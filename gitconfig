@@ -1,0 +1,33 @@
+[color]
+	ui = true
+[user]
+	name = Fabian Poeschl
+	email = fab.poeschl@gmail.com
+  signingkey = 0x552BDD92BCF641A8
+[alias]
+  co = checkout
+  ci = commit
+  st = status
+  br = branch
+  l  = log --graph --abbrev-commit --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+  diffw = diff --word-diff=color
+[color]
+  ui = auto
+[core]
+  excludesfile = ~/.gitignore
+  autocrlf = input
+  editor = gvim -f
+  pager = less -+$LESS -RSX
+[push]
+  default = simple
+[commit]
+  verbose = true
+[submodule]
+  fetchJobs = 4
+[rebase]
+  autostash = true
+[status]
+  showUntrackedFiles = all
+[merge]
+  conflictstyle = diff3
+

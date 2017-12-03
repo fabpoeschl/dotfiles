@@ -1,0 +1,29 @@
+# Make tab autocomplete regardless of filename case
+set completion-ignore-case on
+
+# List all matches in case multiple possible completions are possible
+set show-all-if-ambiguous on
+
+# Immediately add a trailing slash when autocompleting symlinks to directories
+set mark-symlinked-directories on
+
+# show all autocomplete results at once
+set page-completions off
+
+# if more than 200 possible completions for word show all
+set completion-query-items 200
+
+# show extra file info when completing
+set visible-stats on
+
+# intelligent autocompletion
+set skip-completed-text on
+
+# allow utf-8 input
+set input-meta on
+set output-meta off
+set convert-meta off
+
+# Flip through autocompletion matches with Shift-Tab.
+"\e[Z": menu-complete
+
