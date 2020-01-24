@@ -33,7 +33,7 @@ local the_date="%{$fg_bold[green]%}%D{%H:%M:%S}%{$reset_color%}"
 local last_command_status="%(?..%{$fg_bold[red]%}%? %{$reset_color%})"
 local start_of_input="%{$fg_bold[white]%}$%{$reset_color%}"
 PROMPT='$the_date %{$fg_bold[blue]%}%$pathsize<...<$PWD%<<%{$reset_color%} $last_command_status%{$fg_bold[white]%}${(e)barsize}%{$reset_color%}
-#                                   $start_of_input '
+# $start_of_input '
 
 # Git prompt, displayed at right (RPROMPT)
 # See: https://github.com/olivierverdier/zsh-git-prompt

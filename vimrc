@@ -6,14 +6,13 @@ set encoding=utf-8
 
 " set filetype stuff to on
 filetype off
-"}}}
+" }}}
 
 " Vundle {{{
 source ~/.vim/bundles.vim
 " }}}
 "
 " Colors {{{
-colorscheme badwolf
 syntax enable
 " }}}
 
@@ -27,6 +26,7 @@ set smartindent
 
 filetype indent on
 filetype plugin on
+
 " }}}
 
 " UI Layout {{{
@@ -56,6 +56,18 @@ set foldmethod=indent
 nnoremap <space> za
 " }}}
 
+" Tab shortcuts {{{
+nnoremap <C-t> :tabnew<CR>
+nnoremap th  :tabfirst<CR>
+nnoremap tk  :tabnext<CR>
+nnoremap tj  :tabprev<CR>
+nnoremap tl  :tablast<CR>
+nnoremap tt  :tabedit<Space>
+nnoremap tn  :tabnext<Space>
+nnoremap tm  :tabm<Space>
+nnoremap td  :tabclose<CR>
+" }}}
+
 " Line shortcuts {{{
 " turn off search highlight
 nnoremap <leader><space> :nohlsearch<CR>
@@ -81,12 +93,35 @@ nnoremap <leader>s :mksession<CR>
 nnoremap <leader>c :SyntasticCheck<CR>:Errors<CR>
 " }}}
 
+" System Clipboard {{{
+set clipboard=unnamed
+nnoremap <C-y> "+y
+vnoremap <C-y> "+y
+nnoremap <C-p> "+gP
+vnoremap <C-p> "+gP
+" }}}
+
 " CtrlP {{{
 let g:ctrlp_match_window = 'bottom,order:ttb'
 let g:ctrlp_switch_buffer = 0
 let g:ctrlp_working_path_mode = 0
 let g:ctrlp_custom_ignore = '\vbuild/|dist/venv/|target/|\.(o|swp|pyc|egg)$'
 " }}}
+
+" The Silver Searcher
+if executable('ag')
+  " Use ag over grep
+  set grepprg=ag\ --nogroup\ --nocolor
+
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+
+  " ag is fast enough that CtrlP doesn't need to cache
+  let g:ctrlp_use_caching = 0
+endif
+
+" bind K to grep word under cursor
+nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " Syntastic {{{
 let g:syntastic_python_flake8_args='--ignore=E501'
@@ -98,8 +133,7 @@ let g:syntastic_python_python_exec = 'python3'
 augroup configgroup
         autocmd!
         autocmd VimEnter * highlight clear SignColumn
-        autocmd BufWritePre *.php,*.py,*.js,*.txt,*.java
-                    \:call <SID>StripTrailingWhitespaces()
+        autocmd BufWritePre *.php,*.py,*.js,*.txt,*.java %s/\s\+$//e
         autocmd FileType java setlocal list
         autocmd FileType java setlocal listchars=tab+\ ,eol:-
         autocmd FileType java setlocal formatprg=par\ -w80\ -T4
@@ -127,5 +161,29 @@ set backupskip=/tmp/*,/private/tmp/*
 set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set writebackup
 " }}}
+
+" Custom Functions {{{
+
+" toggle between number a nd relativenumber
+function! ToggleNumber()
+    if(&relativenumber == 1)
+        set norelativenumber
+        set number
+    else
+        set relativenumber
+    endif
+endfunc
+
+" strips trailing whitespace at the end of files. this
+" is called on buffer write in the autogroup above.
+function! <SID>StripTrailingWhitespaces()
+    " save last search & cursor position
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    %s/\s\+$//e
+    let @/=_s
+    call cursor(l, c)
+endfunction  }}}
 
 " vim:foldmethod=marker:foldlevel=0

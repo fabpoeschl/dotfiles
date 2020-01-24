@@ -11,7 +11,8 @@ Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-surround'
 Plugin 'kien/ctrlp.vim'
 Plugin 'sjl/gundo.vim'
-Plugin 'sjl/badwolf'
+Plugin 'epmatsw/ag.vim'
+Plugin 'morhetz/gruvbox'
 
 call vundle#end()
 filetype plugin indent on

@@ -34,7 +34,7 @@ link_if_missing $PWD/bash $HOME/.bash
 link_if_missing $PWD/bashrc $HOME/.bashrc
 link_if_missing $PWD/gitconfig $HOME/.gitconfig
 link_if_missing $PWD/gitignore $HOME/.gitignore
-#link_if_missing $PWD/tmux.conf $HOME/.tmux.conf
+link_if_missing $PWD/tmux.conf $HOME/.tmux.conf
 link_if_missing $PWD/vim $HOME/.vim
 link_if_missing $PWD/vimrc ~/.vimrc
 link_if_missing $PWD/zsh ~/.zsh

@@ -38,6 +38,3 @@ bindkey -s '^ ' 'git status --short^M'
 # Find the key with: showkey -a
 # '^J': Ctrl+Enter
 bindkey '^J' autosuggest-execute
-
-# Disable flow control (ctrl+s, ctrl+q) to enable saving with ctrl+s in Vim
-stty -ixon -ixoff
