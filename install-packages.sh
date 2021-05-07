@@ -3,19 +3,19 @@ set +e
 log_file=~/install_progress_log.txt
 
 # latest packages
-sudo apt-get update
-sudo apt-get upgrade
+brew update
+brew upgrade
 # zsh
-sudo apt-get -y install zsh
+brew -y install zsh
 if type -p zsh > /dev/null; then
 	echo "zsh installed" >> $log_file
 else
 	echo "Failed to install zsh!" >> $log_file
 fi
-sudo apt-get -y install zsh-syntax-highlighting
+brew -y install zsh-syntax-highlighting
 
 # tmux
-sudo apt-get -y install tmux
+brew -y install tmux
 if type -p tmux > /dev/null; then
 	echo "tmux Installed" >> $log_file
 else
@@ -23,7 +23,7 @@ else
 fi
 
 # vim
-sudo apt-get -< install vim
+brew -< install vim
 if type -p vim > /dev/null; then
 	echo "vim installed" >> $log_file
 else
@@ -32,7 +32,7 @@ fi
 
 # keepassx
 sudo add-apt-repository ppa:eugenesan/ppa
-sudo apt-get -y install keepassx
+brew -y install keepassx
 if type -p keepassx > /dev/null; then
 	echo "keepassx installed" >> $log_file
 else
@@ -40,7 +40,7 @@ else
 fi
 
 # curl
-sudo apt-get -y install curl
+brew -y install curl
 if type -p curl > /dev/null; then
 	echo "curl installed" >> $log_file
 else
@@ -48,7 +48,7 @@ else
 fi
 
 # gcc
-sudo apt-get -y install gcc 
+brew -y install gcc 
 if type -p gcc > /dev/null; then
 	echo "gcc installed" >> $log_file
 else
@@ -56,7 +56,7 @@ else
 fi
 
 # ruby
-sudo apt-get -y install ruby 
+brew -y install ruby 
 if type -p ruby > /dev/null; then
 	echo "ruby installed" >> $log_file
 else
@@ -64,16 +64,16 @@ else
 fi
 
 # python
-sudo apt-get -y install python 
+brew -y install python 
 if type -p python > /dev/null; then
 	echo "python installed" >> $log_file
 else
 	echo "Failed to install python!" >> $log_file
 fi
-sudo apt-get -y install python-dev
+brew -y install python-dev
 
 # python-pip
-sudo apt-get -y install python-pip
+brew -y install python-pip
 if type -p pip > /dev/null; then
 	echo "pip Installed" >> $log_file
 else
@@ -81,7 +81,7 @@ else
 fi
 
 # texmaker
-sudo apt-get -y install texmaker 
+brew -y install texmaker 
 if type -p texmaker > /dev/null; then
 	echo "texmaker installed" >> $log_file
 else
@@ -89,7 +89,7 @@ else
 fi
 
 # openvpn
-sudo apt-get -y install openvpn 
+brew -y install openvpn 
 if type -p texmaker > /dev/null; then
 	echo "openvpn installed" >> $log_file
 else
@@ -97,7 +97,7 @@ else
 fi
 
 # mongodb
-sudo apt-get -y install mongodb 
+brew -y install mongodb 
 if type -p mongo > /dev/null; then
 	echo "mongodb installed" >> $log_file
 else
@@ -105,7 +105,7 @@ else
 fi
 
 # mysql-server
-sudo apt-get -y install mysql-server-5.7 
+brew -y install mysql-server-5.7 
 if type -p mysql > /dev/null; then
 	echo "mysql installed" >> $log_file
 else
@@ -113,7 +113,7 @@ else
 fi
 
 # firefox 
-sudo apt-get -y firefox 
+brew -y firefox 
 if type -p firefox > /dev/null; then
 	echo "firefox installed" >> $log_file
 else
@@ -134,7 +134,7 @@ wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-ke
 sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sourcessudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources
 
 # rvm
-sudo apt-get -y install rvm 
+brew -y install rvm 
 if type -p rvm > /dev/null; then
 	echo "rvm installed" >> $log_file
 else
@@ -142,7 +142,7 @@ else
 fi
 
 # atom 
-sudo apt-get -y install atom 
+brew -y install atom 
 if type -p atom > /dev/null; then
 	echo "atom installed" >> $log_file
 else
@@ -150,7 +150,7 @@ else
 fi
 
 # atom 
-sudo apt-get -y install spotify 
+brew -y install spotify 
 if type -p atom > /dev/null; then
 	echo "spotify installed" >> $log_file
 else
@@ -158,7 +158,7 @@ else
 fi
 
 # chrome 
-sudo apt-get -y install google-chrome-stable
+brew -y install google-chrome-stable
 if type -p google-chrome > /dev/null; then
 	echo "chrome installed" >> $log_file
 else

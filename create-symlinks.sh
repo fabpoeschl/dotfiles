@@ -54,7 +54,7 @@ function clone_if_missing() {
   fi
 }
 
-clone_if_missing https://github.com/mrzool/bash-sensible "${HOME}/.bash/bash-sensible"
+#clone_if_missing https://github.com/mrzool/bash-sensible "${HOME}/.bash/bash-sensible"
 clone_if_missing  https://github.com/tarjoilija/zgen.git "${HOME}/.zsh/zgen"
 clone_if_missing  https://github.com/VundleVim/Vundle.vim.git "${HOME}/.vim/bundle/Vundle.vim"
 vim +PluginInstall +qall

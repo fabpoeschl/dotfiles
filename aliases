@@ -15,6 +15,7 @@ alias c='cd'
 alias clhist='echo "" > ~/.zsh_history & exec $SHELL -l'
 alias gitrm="rm -rf .git"i
 alias ls="ls --color -l -h"
+alias ll="ls -la"
 alias grep="grep -n --color=auto"
 alias fgrep="fgrep -n --color=auto"
 alias egrep="egrep -n --color=auto"
