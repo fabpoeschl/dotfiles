@@ -23,6 +23,8 @@ brew install docker-compose
 
 brew install --cask postman
 
+brew install --cask visual-studio-code
+
 # tmux
 brew install tmux
 if type -p tmux > /dev/null; then
@@ -87,6 +89,7 @@ if type -p mongo > /dev/null; then
 else
 	echo "Failed to installed mongodb!" >> $log_file
 fi
+brew install --cask robo-3t
 
 # mysql-server
 brew install mysql-server-5.7 
@@ -95,6 +98,7 @@ if type -p mysql > /dev/null; then
 else
 	echo "Failed to installed mysql!" >> $log_file
 fi
+brew install --cask mysql-workbench
 
 # rvm
 current_dir = "$(pwd)"
@@ -102,6 +106,8 @@ mkdir -p ~/.rvm/src && cd ~/.rvm/src && rm -rf ./rvm && \
 git clone --depth 1 https://github.com/rvm/rvm.git && \
 cd rvm && ./install
 cd ${current_dir}
+
+brew install --cask slack
 
 # =================
 # summary

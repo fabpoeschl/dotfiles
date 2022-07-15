@@ -43,3 +43,5 @@ fi
 export PATH="/opt/oc-tools:/usr/local/opt/libxml2/bin:/usr/local/opt/libxslt/bin:/usr/local/opt/libiconv/bin:$PATH"
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
+export PATH="/usr/local/opt/libxml2/bin:$PATH"
+export PATH="/usr/local/opt/libxslt/bin:$PATH"

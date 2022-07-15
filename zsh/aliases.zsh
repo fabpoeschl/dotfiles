@@ -8,10 +8,16 @@ alias h='history -iD'
 
 # ls
 # -v: natural sort of version
-alias ls='gls -v --classify --group-directories-first --color=auto'
-alias  l='gls -l --human-readable -v --classify --group-directories-first --color=auto'
-alias ll='gls -l --human-readable -v --classify --group-directories-first --color=auto'
-alias la='gls -l --almost-all --human-readable -v --classify --group-directories-first --color=auto'
+case "$(uname -s)" in
+	Darwin*) listCmd=gls;;
+	Linux*)  listCmd=ls;;
+	*)       listCmd=ls;;
+esac
+ 
+alias ls='${listCmd} -v --classify --group-directories-first --color=auto'
+alias  l='${listCmd} -l --human-readable -v --classify --group-directories-first --color=auto'
+alias ll='${listCmd} -l --human-readable -v --classify --group-directories-first --color=auto'
+alias la='${listCmd} -l --almost-all --human-readable -v --classify --group-directories-first --color=auto'
 
 # grep
 alias  grep='grep --color=auto'
@@ -55,6 +61,11 @@ alias oc-mongo-prd-billing='LOCAL_PORT=27016 && oc project prd-billing && oc-mon
 alias oc-mongo-prd-apple='LOCAL_PORT=27015 && oc project prd-apple-premium-adapter && oc-mongo'
 alias oc-mongo-prd-google='LOCAL_PORT=27014 && oc project prd-google-premium-adapter && oc-mongo'
 alias oc-mongo-stg-billing='LOCAL_PORT=27016 && oc project stg-billing && oc-mongo'
+alias oc-mongo-prd-rewards='LOCAL_PORT=27013 && oc project prd-premium-rewards && oc-mongo'
 alias oc-mongo-stg-apple='LOCAL_PORT=27015 && oc project stg-apple-premium-adapter && oc-mongo'
 alias oc-mongo-stg-google='LOCAL_PORT=27014 && oc project stg-google-premium-adapter && oc-mongo'
+alias oc-mongo-stg-rewards='LOCAL_PORT=27013 && oc project stg-premium-rewards && oc-mongo'
 alias oc-mongo-premium-dev='LOCAL_PORT=27011 && oc project dev-premium-dev && oc-mongo-dev'
+
+# Docker
+alias start-docker-machine='docker-machine start && eval "$(docker-machine env default)"'

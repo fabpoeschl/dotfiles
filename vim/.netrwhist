@@ -1,0 +1,8 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =6
+let g:netrw_dirhist_6='scp://runtastic-web@prd-web-server-001//var/rails/runtastic-web/'
+let g:netrw_dirhist_5='scp://runtastic-web@prd-web-server-001//var/rails/runtastic-web/current/'
+let g:netrw_dirhist_4='scp://runtastic-web@prd-web-server-001/'
+let g:netrw_dirhist_3='scp://runtastic-web@prd-web-server-001//var/rails/runtastic-web/'
+let g:netrw_dirhist_2='scp://runtastic-web@prd-web-server-001/var/rails/runtastic-web/'
+let g:netrw_dirhist_1='scp://runtastic-web@prd-web-server-001/'

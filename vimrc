@@ -184,6 +184,7 @@ function! <SID>StripTrailingWhitespaces()
     %s/\s\+$//e
     let @/=_s
     call cursor(l, c)
-endfunction  }}}
+endfunction
+" }}}
 
 " vim:foldmethod=marker:foldlevel=0
