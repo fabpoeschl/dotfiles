@@ -20,7 +20,7 @@ zstyle ':completion:*::::' completer _expand _complete _ignored _approximate
 zstyle ':completion:*:approximate:*' max-errors 1 numeric
 
 # colors
-eval "$(dircolors -b)"
+#eval "$(dircolors -b)"
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' list-colors ''
 zstyle ':completion:*:original' list-colors "=*=$color[red];$color[bold]"
