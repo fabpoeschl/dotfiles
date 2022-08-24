@@ -1,12 +1,13 @@
+vim/plugged/*
+config/coc/*
+config/configstore/*
+config/containers/*
 *.swp
 *~
 .svn/
 .sass-cache
 /log/*
 /tmp/*
-*.sqlite3
-*.sqlite
-*.class
 target/
 .classpath
 .settings
@@ -18,4 +19,6 @@ target/
 .DS_Store
 Thumbs.db
 .env
+tags
+.tags
 

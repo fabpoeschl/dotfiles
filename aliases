@@ -28,6 +28,9 @@ alias week='date +%V'
 alias reload="exec ${SHELL} -l"
 alias path='echo -e ${PATH//:/\\n}'
 
+alias docker='podman'
+alias docker-compose='podman-compose'
+
 # --- Config ---
 alias zcfg="vim ~/.zshrc"
 alias zrld="source ~/.zshrc"
