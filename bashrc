@@ -64,3 +64,5 @@ alias gaa='git add -A'
 #alias  mci='mvn clean install'
 #alias mcit='mvn clean install -Dmaven.test.skip=true'
 #alias  mdt="mvn dependency:tree"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

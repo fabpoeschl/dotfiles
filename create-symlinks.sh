@@ -18,8 +18,10 @@ function link_if_missing() {
 # ============
 sudo rm -rf ~/.bash > /dev/null 2>&1
 sudo rm -rf ~/.bashrc > /dev/null 2>&1
+sudo rm -rf ~/.config > /dev/null 2>&1
 sudo rm -rf ~/.gitconfig > /dev/null 2>&1
 sudo rm -rf ~/.gitignore > /dev/null 2>&1
+sudo rm -rf ~/.git_template > /dev/null 2>&1
 sudo rm -rf ~/.tmux > /dev/null 2>&1
 sudo rm -rf ~/.tmux.conf > /dev/null 2>&1
 sudo rm -rf ~/.vim > /dev/null 2>&1
@@ -32,8 +34,10 @@ sudo rm -rf ~/.zshrc > /dev/null 2>&1
 # ============
 link_if_missing $PWD/bash $HOME/.bash
 link_if_missing $PWD/bashrc $HOME/.bashrc
+link_if_missing $PWD/config $HOME/.config
 link_if_missing $PWD/gitconfig $HOME/.gitconfig
 link_if_missing $PWD/gitignore $HOME/.gitignore
+link_if_missing $PWD/git_template $HOME/.git_template
 link_if_missing $PWD/tmux.conf $HOME/.tmux.conf
 link_if_missing $PWD/vim $HOME/.vim
 link_if_missing $PWD/vimrc ~/.vimrc
@@ -56,7 +60,6 @@ function clone_if_missing() {
 
 #clone_if_missing https://github.com/mrzool/bash-sensible "${HOME}/.bash/bash-sensible"
 clone_if_missing  https://github.com/tarjoilija/zgen.git "${HOME}/.zsh/zgen"
-clone_if_missing  https://github.com/VundleVim/Vundle.vim.git "${HOME}/.vim/bundle/Vundle.vim"
 vim +PluginInstall +qall
 
 chsh -s `which zsh`

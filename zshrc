@@ -16,6 +16,7 @@ if ! zgen saved; then
   zgen oh-my-zsh plugins/sudo
   zgen oh-my-zsh plugins/httpie
   zgen oh-my-zsh plugins/command-not-found
+  zgen load zsh/complist
   zgen load zsh-users/zsh-completions src
   zgen load olivierverdier/zsh-git-prompt
   zgen load chrissicool/zsh-256color
@@ -27,21 +28,52 @@ if ! zgen saved; then
   zgen save
 fi
 
-source ~/.zsh/config.zsh
-source ~/.zsh/completion.zsh
-source ~/.zsh/aliases.zsh
-source ~/.zsh/bindkey.zsh
-source ~/.zsh/prompt.zsh
-source ~/.zsh/functions
+ZSH_BASE_DIR="./zsh"
+if [[ -d "$ZSH_BASE_DIR" ]]; then
+  for file in "$ZSH_BASE_DIR"/*.zsh; do
+    source "$file"
+  done
+  unset file
+fi
+
+ZSH_FUNCTIONS_DIR='${ZSH_BASE_DIR}/functions'
+if [[ -d "$ZSH_BASE_DIR" ]]; then
+  for file in "$ZSH_FUNCTIONS_DIR"/*.zsh; do
+    source "$file"
+  done
+  unset file
+fi
+
+# try to include all sources
+foreach file (`echo $sources`)
+    if [[ -a $file ]]; then
+        # sourceIncludeTimeStart=$(gdate +%s%N)
+        source $file
+        # sourceIncludeDuration=$((($(gdate +%s%N) - $sourceIncludeTimeStart)/1000000))
+        # echo $sourceIncludeDuration ms runtime for $file
+    fi
+end
 
 if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
 fi
 
+# rbenv init
+eval "$(rbenv init - zsh)"
+
+# nvm init
+export NVM_DIR="$HOME/.nvm"
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export PATH="/opt/oc-tools:/usr/local/opt/libxml2/bin:/usr/local/opt/libxslt/bin:/usr/local/opt/libiconv/bin:$PATH"
-export PATH="$HOME/.jenv/bin:$PATH"
-eval "$(jenv init -)"
-export PATH="/usr/local/opt/libxml2/bin:$PATH"
-export PATH="/usr/local/opt/libxslt/bin:$PATH"
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
+
+ulimit -Sn 10240
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rbenv/shims:/opt/homebrew/Cellar/jemalloc:/opt/homebrew/opt/node@14/bin:$(pyenv root)/shims"
+eval "$(rbenv init -)"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

@@ -1,3 +1,5 @@
+[init]
+    templatedir = ~/.git_template
 [color]
 	ui = true
 [user]
@@ -7,6 +9,7 @@
 [alias]
   co = checkout
   ci = commit
+  ctags = !.git/hooks/ctags
   st = status
   br = branch
   l  = log --graph --abbrev-commit --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
