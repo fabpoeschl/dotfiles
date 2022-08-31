@@ -28,7 +28,7 @@ if ! zgen saved; then
   zgen save
 fi
 
-ZSH_BASE_DIR="./zsh"
+ZSH_BASE_DIR="${HOME}/.zsh"
 if [[ -d "$ZSH_BASE_DIR" ]]; then
   for file in "$ZSH_BASE_DIR"/*.zsh; do
     source "$file"
@@ -36,7 +36,7 @@ if [[ -d "$ZSH_BASE_DIR" ]]; then
   unset file
 fi
 
-ZSH_FUNCTIONS_DIR='${ZSH_BASE_DIR}/functions'
+ZSH_FUNCTIONS_DIR="${ZSH_BASE_DIR}/functions"
 if [[ -d "$ZSH_BASE_DIR" ]]; then
   for file in "$ZSH_FUNCTIONS_DIR"/*.zsh; do
     source "$file"
