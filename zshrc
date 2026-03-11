@@ -57,13 +57,8 @@ if [ -f ~/.zshrc.local ]; then
   source ~/.zshrc.local
 fi
 
-# rbenv init
-eval "$(rbenv init - zsh)"
-
-# nvm init (manages Node versions - no hardcoded node path needed)
-export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+# mise - polyglot version manager (replaces rbenv, nvm, pyenv)
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -71,9 +66,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
 
 ulimit -Sn 10240
 
-# PATH additions (rbenv is initialized above via eval; pyenv shims added if available)
 export PATH="$PATH:/opt/homebrew/Cellar/jemalloc"
-command -v pyenv &>/dev/null && export PATH="$PATH:$(pyenv root)/shims"
 
 # zoxide (smart cd replacement)
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"

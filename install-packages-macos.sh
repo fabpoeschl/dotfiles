@@ -35,8 +35,9 @@ brew install zsh-syntax-highlighting
 install_brew tmux
 install_brew curl
 install_brew gcc
-install_brew ruby
-install_brew python3 python3
+
+# mise - polyglot version manager (replaces rbenv, nvm, pyenv)
+install_brew mise
 
 # modern CLI replacements
 install_brew ripgrep ripgrep rg
@@ -62,8 +63,6 @@ install_brew openvpn
 # apps
 install_cask slack
 
-# rbenv for Ruby version management (replaces rvm)
-install_brew rbenv
 
 # =================
 # summary

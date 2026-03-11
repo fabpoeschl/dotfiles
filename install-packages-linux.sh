@@ -25,9 +25,10 @@ install_apt tmux
 install_apt vim
 install_apt curl
 install_apt gcc
-install_apt ruby
-install_apt python3
-install_apt pip python3-pip pip3
+
+# mise - polyglot version manager (replaces rbenv, nvm, pyenv)
+# installs ruby, node, python etc. via: mise use --global ruby@latest node@lts python@latest
+curl https://mise.run | sh
 
 # modern CLI replacements
 install_apt ripgrep ripgrep rg
