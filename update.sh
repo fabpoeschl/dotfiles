@@ -20,40 +20,7 @@ warn()  { echo -e "${YELLOW}[skip]${NC} $1"; }
 error() { echo -e "${RED}[fail]${NC} $1"; }
 
 # ============
-# Package installation helpers
-# ============
-install_if_missing_brew() {
-  local name=$1
-  local pkg=${2:-$1}
-  if brew list "$pkg" &>/dev/null; then
-    warn "$name already installed"
-  else
-    brew install "$pkg" && info "$name installed" || error "$name failed to install"
-  fi
-}
-
-install_cask_if_missing() {
-  local name=$1
-  local pkg=${2:-$1}
-  if brew list --cask "$pkg" &>/dev/null; then
-    warn "$name (cask) already installed"
-  else
-    brew install --cask "$pkg" && info "$name installed" || error "$name failed to install"
-  fi
-}
-
-install_if_missing_apt() {
-  local name=$1
-  local pkg=${2:-$1}
-  if dpkg -s "$pkg" &>/dev/null; then
-    warn "$name already installed"
-  else
-    sudo apt-get -y install "$pkg" && info "$name installed" || error "$name failed to install"
-  fi
-}
-
-# ============
-# Install/update packages
+# Install/update packages (reads from Brewfile / packages.txt)
 # ============
 install_packages() {
   echo ""
@@ -61,61 +28,30 @@ install_packages() {
 
   if [[ "$OS" == "Darwin" ]]; then
     brew update
-
-    # core
-    install_if_missing_brew coreutils
-    install_if_missing_brew zsh-syntax-highlighting
-    install_if_missing_brew tmux
-    install_if_missing_brew curl
-    install_if_missing_brew gcc
-
-    # version manager
-    install_if_missing_brew mise
-
-    # modern CLI tools
-    install_if_missing_brew ripgrep
-    install_if_missing_brew fd
-    install_if_missing_brew bat
-    install_if_missing_brew eza
-    install_if_missing_brew delta git-delta
-    install_if_missing_brew fzf
-    install_if_missing_brew zoxide
-    install_if_missing_brew lazygit
-
-    # casks
-    install_cask_if_missing docker
-    install_if_missing_brew docker-compose
-    install_cask_if_missing postman
-    install_cask_if_missing visual-studio-code
-    install_cask_if_missing slack
+    brew bundle install --file="$DOTFILES_DIR/Brewfile" --no-lock
+    info "Brewfile packages installed"
 
   elif [[ "$OS" == "Linux" ]]; then
     sudo apt-get update
 
-    # core
-    install_if_missing_apt zsh
-    install_if_missing_apt zsh-syntax-highlighting
-    install_if_missing_apt tmux
-    install_if_missing_apt vim
-    install_if_missing_apt curl
-    install_if_missing_apt gcc
+    # Install packages from packages.txt
+    while IFS= read -r line; do
+      [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+      local pkg
+      pkg="$(echo "$line" | xargs)"
+      if dpkg -s "$pkg" &>/dev/null; then
+        warn "$pkg already installed"
+      else
+        sudo apt-get -y install "$pkg" && info "$pkg installed" || error "$pkg failed to install"
+      fi
+    done < "$DOTFILES_DIR/packages.txt"
 
-    # version manager
+    # mise (not in apt, installed via curl)
     if ! command -v mise &>/dev/null; then
       curl https://mise.run | sh && info "mise installed" || error "mise failed to install"
     else
       warn "mise already installed"
     fi
-
-    # modern CLI tools
-    install_if_missing_apt ripgrep
-    install_if_missing_apt fd fd-find
-    install_if_missing_apt bat
-    install_if_missing_apt eza
-    install_if_missing_apt delta git-delta
-    install_if_missing_apt fzf
-    install_if_missing_apt zoxide
-    install_if_missing_apt firefox
 
   else
     error "Unknown OS: $OS"

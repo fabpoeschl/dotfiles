@@ -1,0 +1,26 @@
+# Linux (apt) packages - one per line
+# Lines starting with # are comments, blank lines are ignored
+# Format: package_name  (installed via apt-get)
+
+# Core
+zsh
+zsh-syntax-highlighting
+tmux
+vim
+curl
+gcc
+
+# Modern CLI tools
+ripgrep
+fd-find
+bat
+eza
+git-delta
+fzf
+zoxide
+
+# Networking
+openvpn
+
+# Browsers
+firefox
