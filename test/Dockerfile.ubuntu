@@ -1,0 +1,18 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# Minimal base (what a real system would have)
+RUN apt-get update && apt-get install -y \
+    git sudo curl wget ca-certificates software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy dotfiles into the container
+COPY . /root/dotfiles
+WORKDIR /root/dotfiles
+
+# Make scripts executable
+RUN chmod +x update.sh install.sh install-packages-linux.sh create-symlinks.sh
+
+CMD ["bash"]
