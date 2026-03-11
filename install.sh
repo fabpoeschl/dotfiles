@@ -1,8 +1,4 @@
 #!/bin/bash
-case "$(uname -s)" in
-	Darwin*) ./install-packages-macos.sh;; 
-	Linux*)  ./install-packages-linux.sh;;
-	*)       echo "Unknown OS. Aborting installation";;
-esac
-
-./create-symlinks.sh
+# Fresh install or update - both are handled by update.sh
+cd "$(dirname "$0")"
+exec ./update.sh
