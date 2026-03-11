@@ -1,0 +1,47 @@
+#!/bin/bash
+# chezmoi:template:left-delimiter="{{" right-delimiter="}}"
+# Install system packages. Re-runs when Brewfile or packages.txt changes.
+#
+# Brewfile hash: {{ include "Brewfile" | sha256sum }}
+# packages.txt hash: {{ include "packages.txt" | sha256sum }}
+
+set -euo pipefail
+
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+info()  { echo -e "${GREEN}[ok]${NC} $1"; }
+warn()  { echo -e "${YELLOW}[skip]${NC} $1"; }
+error() { echo -e "${RED}[fail]${NC} $1"; }
+
+OS="$(uname -s)"
+
+echo "=== Installing packages ==="
+
+if [[ "$OS" == "Darwin" ]]; then
+  brew update
+  brew bundle install --file="{{ .chezmoi.sourceDir }}/Brewfile" --no-lock
+  info "Brewfile packages installed"
+
+elif [[ "$OS" == "Linux" ]]; then
+  sudo apt-get update
+
+  while IFS= read -r line; do
+    [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+    pkg="$(echo "$line" | xargs)"
+    if dpkg -s "$pkg" &>/dev/null; then
+      warn "$pkg already installed"
+    else
+      sudo apt-get -y install "$pkg" && info "$pkg installed" || error "$pkg failed to install"
+    fi
+  done < "{{ .chezmoi.sourceDir }}/packages.txt"
+
+  # mise (not in apt)
+  if ! command -v mise &>/dev/null; then
+    curl https://mise.run | sh && info "mise installed" || error "mise failed to install"
+  else
+    warn "mise already installed"
+  fi
+fi

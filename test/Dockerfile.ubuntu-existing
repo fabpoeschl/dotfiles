@@ -15,10 +15,12 @@ RUN echo 'echo "old bashrc"' > /root/.bashrc && \
     echo '[user]\n\tname = Old Name' > /root/.gitconfig && \
     mkdir -p /root/.zsh/zgen && echo "fake zgen" > /root/.zsh/zgen/zgen.zsh
 
-# Copy dotfiles into the container
-COPY . /root/dotfiles
-WORKDIR /root/dotfiles
+# Install chezmoi
+RUN sh -c "$(curl -fsLS get.chezmoi.io)"
 
-RUN chmod +x update.sh install.sh install-packages-linux.sh create-symlinks.sh
+# Copy dotfiles as chezmoi source
+COPY . /root/.local/share/chezmoi
+WORKDIR /root
 
+# To test: docker run -it <image> chezmoi diff
 CMD ["bash"]

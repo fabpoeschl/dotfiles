@@ -8,11 +8,11 @@ RUN apt-get update && apt-get install -y \
     git sudo curl wget ca-certificates software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dotfiles into the container
-COPY . /root/dotfiles
-WORKDIR /root/dotfiles
+# Install chezmoi
+RUN sh -c "$(curl -fsLS get.chezmoi.io)"
 
-# Make scripts executable
-RUN chmod +x update.sh install.sh install-packages-linux.sh create-symlinks.sh
+# Copy dotfiles as chezmoi source
+COPY . /root/.local/share/chezmoi
+WORKDIR /root
 
 CMD ["bash"]

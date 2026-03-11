@@ -3,9 +3,11 @@
 [color]
 	ui = true
 [user]
-	name = Fabian Poeschl
-	email = fab.poeschl@gmail.com
-  signingkey = 0x552BDD92BCF641A8
+	name = {{ .name }}
+	email = {{ .email }}
+{{- if .signingkey }}
+  signingkey = {{ .signingkey }}
+{{- end }}
 [alias]
   co = checkout
   ci = commit
@@ -33,4 +35,3 @@
   showUntrackedFiles = all
 [merge]
   conflictstyle = diff3
-

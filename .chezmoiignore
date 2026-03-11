@@ -1,0 +1,10 @@
+# Repo files that are not dotfiles
+IMPROVEMENTS.md
+README.md
+LICENSE
+Brewfile
+packages.txt
+install.sh
+install-packages-linux.sh
+install-packages-macos.sh
+test/

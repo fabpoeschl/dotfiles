@@ -1,0 +1,11 @@
+[".zsh/zgenom"]
+  type = "git-repo"
+  url = "https://github.com/jandamm/zgenom.git"
+  clone.args = ["--depth", "1"]
+  pull.args = ["--depth", "1"]
+
+[".bash/bash-sensible"]
+  type = "git-repo"
+  url = "https://github.com/mrzool/bash-sensible.git"
+  clone.args = ["--depth", "1"]
+  pull.args = ["--depth", "1"]
