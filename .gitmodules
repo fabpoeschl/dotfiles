@@ -1,13 +1,8 @@
-[submodule "vim/bundle/Vundle.vim"]
-  path = vim/bundle/Vundle.vim
-  url = https://github.com/gmarik/Vundle.vim.git
-  shallow = true
-[submodule "zsh/zgen"]
-  path = zsh/zgen
-  url = https://github.com/tarjoilija/zgen.git
+[submodule "zsh/zgenom"]
+  path = zsh/zgenom
+  url = https://github.com/jandamm/zgenom.git
   shallow = true
 [submodule "bash/bash-sensible"]
   path = bash/bash-sensible
   url = https://github.com/mrzool/bash-sensible
   shallow = true
-

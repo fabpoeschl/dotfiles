@@ -87,9 +87,6 @@ nnoremap B ^
 nnoremap E $
 " save session
 nnoremap <leader>s :mksession<CR>
-" ,c is Syntastic check
-nnoremap <leader>c :SyntasticCheck<CR>:Errors<CR>
-
 " <leader>{y,x,p} : {yank,cut,paste} wrt the system clipboard
 map <leader>y "*y
 noremap <leader>x "*x
@@ -189,14 +186,14 @@ let g:airline#extensions#tabline#show_buffers = 1
 let g:airline#extensions#whitespace#mixed_indent_algo = 1
 " }}}
 
+" Use ripgrep for :grep if available, fall back to grep
+if executable('rg')
+  set grepprg=rg\ --vimgrep\ --smart-case
+  set grepformat=%f:%l:%c:%m
+endif
+
 " bind K to grep word under cursor
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
-
-" Syntastic {{{
-let g:syntastic_python_flake8_args='--ignore=E501'
-let g:syntastic_ignore_files = ['.java$']
-let g:syntastic_python_python_exec = 'python3'
-" }}}
 
 " Backups {{{
 " no fucking swap and backup files

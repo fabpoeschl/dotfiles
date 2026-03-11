@@ -54,13 +54,13 @@ function clone_if_missing() {
   if ! [ -d $DEST ]; then
     git clone $URL $DEST
   else
-    "Skipping, already loaded: $DEST"
+    echo "Skipping, already loaded: $DEST"
   fi
 }
 
 #clone_if_missing https://github.com/mrzool/bash-sensible "${HOME}/.bash/bash-sensible"
-clone_if_missing  https://github.com/tarjoilija/zgen.git "${HOME}/.zsh/zgen"
-vim +PluginInstall +qall
+clone_if_missing https://github.com/jandamm/zgenom.git "${HOME}/.zsh/zgenom"
+vim +PlugInstall +qall
 
 chsh -s `which zsh`
 sudo chsh -s `which zsh`

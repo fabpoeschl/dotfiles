@@ -20,7 +20,7 @@
   excludesfile = ~/.gitignore
   autocrlf = input
 	editor = vim
-  pager = less -+$LESS -RSX
+  pager = delta --dark 2>/dev/null || less -+$LESS -RSX
 [push]
   default = simple
 [commit]

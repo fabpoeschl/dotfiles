@@ -13,7 +13,7 @@ alias w="cd ~/workspace"
 alias g="git"
 alias c='cd'
 alias clhist='echo "" > ~/.zsh_history & exec $SHELL -l'
-alias gitrm="rm -rf .git"i
+alias gitrm="rm -rf .git"
 alias ls="ls --color -l -h"
 alias ll="ls -la"
 alias grep="grep -n --color=auto"

@@ -1,23 +1,36 @@
 alias szshrc='source ~/.zshrc'
-alias f='find -iname'
+# use fd if available, fall back to find
+if command -v fd &>/dev/null; then
+  alias f='fd -i'
+elif command -v fdfind &>/dev/null; then
+  alias f='fdfind -i'
+else
+  alias f='find -iname'
+fi
 alias v='vim'
 alias up="sudo apt update && sudo apt -V --yes upgrade"
 
 # history with timestamps and elapsed time
 alias h='history -iD'
 
-# ls
-# -v: natural sort of version
-case "$(uname -s)" in
-	Darwin*) listCmd=gls;;
-	Linux*)  listCmd=ls;;
-	*)       listCmd=ls;;
-esac
- 
-alias ls='${listCmd} -v --classify --group-directories-first --color=auto'
-alias  l='${listCmd} -l --human-readable -v --classify --group-directories-first --color=auto'
-alias ll='${listCmd} -l --human-readable -v --classify --group-directories-first --color=auto'
-alias la='${listCmd} -l --almost-all --human-readable -v --classify --group-directories-first --color=auto'
+# ls - use eza if available, fall back to ls
+if command -v eza &>/dev/null; then
+  alias ls='eza --classify --group-directories-first'
+  alias  l='eza -l --group-directories-first'
+  alias ll='eza -l --group-directories-first'
+  alias la='eza -la --group-directories-first'
+  alias lt='eza -l --tree --level=2 --group-directories-first'
+else
+  case "$(uname -s)" in
+    Darwin*) listCmd=gls;;
+    Linux*)  listCmd=ls;;
+    *)       listCmd=ls;;
+  esac
+  alias ls='${listCmd} -v --classify --group-directories-first --color=auto'
+  alias  l='${listCmd} -l --human-readable -v --classify --group-directories-first --color=auto'
+  alias ll='${listCmd} -l --human-readable -v --classify --group-directories-first --color=auto'
+  alias la='${listCmd} -l --almost-all --human-readable -v --classify --group-directories-first --color=auto'
+fi
 
 # grep
 alias  grep='grep --color=auto'
@@ -69,3 +82,10 @@ alias oc-mongo-premium-dev='LOCAL_PORT=27011 && oc project dev-premium-dev && oc
 
 # Docker
 alias start-docker-machine='docker-machine start && eval "$(docker-machine env default)"'
+
+# bat (syntax-highlighted cat)
+if command -v bat &>/dev/null; then
+  alias cat='bat --paging=never'
+elif command -v batcat &>/dev/null; then
+  alias cat='batcat --paging=never'
+fi

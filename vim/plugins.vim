@@ -38,7 +38,6 @@ Plug 'scrooloose/nerdtree', { 'on': g:_nerdtree_lazy_events }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': g:_nerdtree_lazy_events }
 Plug 'szw/vim-maximizer'    " zoom and unzoom!
 Plug 'sjl/gundo.vim'
-Plug 'epmatsw/ag.vim'
 if !has('nvim')
   Plug 'tpope/vim-dadbod'
   Plug 'kristijanhusak/vim-dadbod-ui'
@@ -54,7 +53,6 @@ Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'tomtom/tlib_vim'
 Plug 'garbas/vim-snipmate'
 Plug 'honza/vim-snippets'
-Plug 'scrooloose/syntastic'
 
 " colorschemes 
 Plug 'morhetz/gruvbox'

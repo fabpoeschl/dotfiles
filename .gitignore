@@ -3,4 +3,5 @@ vim/bundle
 vim/netrwhist
 zsh/cache
 zsh/zgen
+zsh/zgenom
 
