@@ -2,8 +2,8 @@
 # Port-forward a database pod from a Kubernetes cluster.
 #
 # Usage:
-#   kpf-db <context> <namespace> <database-name>
-#   kpf-db staging my-namespace my-postgres
+#   remote-db-connect <context> <namespace> <database-name>
+#   remote-db-connect staging my-namespace my-postgres
 #
 # Finds the first pod whose name contains <database-name> in the given
 # namespace/context and forwards its database port to localhost.
@@ -12,15 +12,15 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: kpf-db <context> <namespace> <database-name>"
+  echo "Usage: remote-db-connect <context> <namespace> <database-name>"
   echo ""
   echo "  context        Kubernetes context (e.g. staging, production)"
   echo "  namespace      Kubernetes namespace"
   echo "  database-name  Substring to match against pod names (e.g. postgres, redis)"
   echo ""
   echo "Examples:"
-  echo "  kpf-db staging my-ns my-postgres"
-  echo "  kpf-db production payments redis"
+  echo "  remote-db-connect staging my-ns my-postgres"
+  echo "  remote-db-connect production payments redis"
   exit 1
 }
 

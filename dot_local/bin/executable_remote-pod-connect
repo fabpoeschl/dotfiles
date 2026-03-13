@@ -2,7 +2,7 @@
 # Connect to an application pod in a Kubernetes cluster.
 #
 # Usage:
-#   kpf-app <context> <namespace> <app-name> [action]
+#   remote-pod-connect <context> <namespace> <app-name> [action]
 #
 # Actions:
 #   shell   (default) Open an interactive shell in the pod
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: kpf-app <context> <namespace> <app-name> [action] [args...]"
+  echo "Usage: remote-pod-connect <context> <namespace> <app-name> [action] [args...]"
   echo ""
   echo "  context    Kubernetes context (e.g. staging, production)"
   echo "  namespace  Kubernetes namespace"
@@ -29,10 +29,10 @@ usage() {
   echo "  logs                           Tail pod logs"
   echo ""
   echo "Examples:"
-  echo "  kpf-app staging my-ns my-api"
-  echo "  kpf-app staging my-ns my-api forward 3000:3000"
-  echo "  kpf-app staging my-ns my-api forward 3000:3000 5678:5678"
-  echo "  kpf-app staging my-ns my-api logs"
+  echo "  remote-pod-connect staging my-ns my-api"
+  echo "  remote-pod-connect staging my-ns my-api forward 3000:3000"
+  echo "  remote-pod-connect staging my-ns my-api forward 3000:3000 5678:5678"
+  echo "  remote-pod-connect staging my-ns my-api logs"
   exit 1
 }
 
