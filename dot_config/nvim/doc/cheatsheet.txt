@@ -220,6 +220,78 @@ TODO Comments ~
   Recognized keywords: TODO, FIXME, HACK, WARN, PERF, NOTE, TEST
 
 ==============================================================================
+DEBUGGER (nvim-dap)                                    *cheatsheet-dap*
+
+Stepping ~
+  <F5>              Continue / start debug session
+  <F10>             Step over
+  <F11>             Step into
+  <F12>             Step out
+
+Breakpoints ~
+  <leader>db        Toggle breakpoint
+  <leader>dB        Conditional breakpoint (prompts for expression)
+  <leader>dl        Log point (prints message without stopping)
+
+Session Control ~
+  <leader>dc        Continue
+  <leader>dr        Restart session
+  <leader>dq        Terminate session
+  <leader>dp        Pause execution
+  <leader>dC        Run to cursor
+
+UI ~
+  <leader>du        Toggle DAP UI panels
+  <leader>de        Evaluate expression (works in visual mode too)
+  <leader>dh        Hover variable under cursor
+  <leader>do        Toggle REPL
+
+Debug Configurations ~
+
+  Python:
+    Launch file                         Run current .py file
+    Launch with arguments               Prompts for CLI arguments
+    Attach remote (localhost:5678)      For kubectl port-forward / debugpy
+    Attach remote (custom host:port)    Prompts for host and port
+
+  JavaScript / TypeScript:
+    Launch file (Node)                  Run current file with Node
+    Attach to Node (localhost:9229)     For --inspect / kubectl port-forward
+    Attach to Node (custom host:port)   Prompts for host and port
+    Launch Chrome                       Debug in Chrome (prompts for URL)
+
+  Ruby:
+    Launch file                         Run current .rb file
+    Launch with bundler                 bundle exec ruby <file>
+    Launch Rails server                 bundle exec rails server
+    Launch RSpec (current file)         bundle exec rspec <file>
+    Attach remote (localhost:1234)      For rdbg / kubectl port-forward
+    Attach remote (custom host:port)    Prompts for host and port
+
+Remote Debugging (Kubernetes) ~
+
+  The "Attach remote" configurations connect to a debug server over TCP.
+  Use kubectl port-forward to bridge the pod's debug port to localhost:
+
+    # Python (debugpy)
+    kubectl port-forward pod/my-app 5678:5678
+    # Then: <F5> → "Attach remote (localhost:5678)"
+
+    # JavaScript / Node (--inspect)
+    kubectl port-forward pod/my-app 9229:9229
+    # Then: <F5> → "Attach to Node (localhost:9229)"
+
+    # Ruby (rdbg / debug.gem)
+    kubectl port-forward pod/my-app 1234:1234
+    # Then: <F5> → "Attach remote (localhost:1234)"
+
+  On the pod, start the app with its debug server enabled:
+
+    # Python:  python -m debugpy --listen 0.0.0.0:5678 --wait-for-client app.py
+    # Node:    node --inspect=0.0.0.0:9229 app.js
+    # Ruby:    rdbg --open --host 0.0.0.0 --port 1234 -c -- ruby app.rb
+
+==============================================================================
 UI & MISC                                              *cheatsheet-ui*
 
 Undo Tree ~
@@ -234,7 +306,7 @@ Noice (messages) ~
 
 Which-Key ~
   Press <leader> and wait ~300ms to see all available bindings.
-  Each group is labeled: Buffer, Code, Diff, Find, Git, etc.
+  Each group is labeled: Buffer, Code, Debug, Find, Git, etc.
 
 ==============================================================================
 PLUGIN MANAGEMENT                                  *cheatsheet-plugins*
@@ -254,7 +326,7 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
 
   ,b...             Buffer management
   ,c...             Code (format)
-  ,d...             Diff
+  ,d...             Debug (DAP)
   ,f...             Find (Telescope)
   ,g...             Git (lazygit, diffview)
   ,h...             Hunk (gitsigns)
