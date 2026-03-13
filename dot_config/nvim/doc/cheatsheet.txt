@@ -44,7 +44,7 @@ Find Files ~
 
 File Tree (nvim-tree) ~
   <leader>t         Toggle file tree
-  <leader>f         Reveal current file in tree
+  <leader>F         Reveal current file in tree
 
 Buffer Tabs (bufferline) ~
   <S-h>             Previous buffer
@@ -173,6 +173,7 @@ Installed Servers ~
   solargraph        Ruby
   ts_ls             TypeScript / JavaScript
   pyright           Python
+  helm_ls           Helm charts
 
 ==============================================================================
 GIT                                                    *cheatsheet-git*
@@ -234,14 +235,14 @@ Breakpoints ~
   <leader>dl        Log point (prints message without stopping)
 
 Session Control ~
-  <leader>dc        Continue
+  <leader>dx        Continue
   <leader>dr        Restart session
   <leader>dq        Terminate session
   <leader>dp        Pause execution
   <leader>dC        Run to cursor
 
 UI ~
-  <leader>du        Toggle DAP UI panels
+  <leader>di        Toggle DAP UI panels
   <leader>de        Evaluate expression (works in visual mode too)
   <leader>dh        Hover variable under cursor
   <leader>do        Toggle REPL
@@ -292,6 +293,67 @@ Remote Debugging (Kubernetes) ~
     # Ruby:    rdbg --open --host 0.0.0.0 --port 1234 -c -- ruby app.rb
 
 ==============================================================================
+DATABASE (vim-dadbod)                                *cheatsheet-database*
+
+Connection Management ~
+  <leader>du        Toggle DBUI drawer
+  <leader>da        Add a connection manually
+  <leader>dc        Connect to remote DB (K8s pod)
+  <leader>dd        Disconnect remote DB
+
+Remote Connect (:DBConnect) ~
+  :DBConnect -c <ctx> -n <ns> -d <db>     Connect with defaults
+  :DBConnect -c <ctx> -n <ns> -d <db> -p 5433 -b mydb -u admin
+
+  Flags:
+    -c, --context     Kubernetes context
+    -n, --namespace   Kubernetes namespace
+    -d, --database    Pod name substring to match
+    -s, --secret      Secret name (defaults to -d value)
+    -k, --key         Secret key (default: password)
+    -u, --user        DB user (default: postgres)
+    -p, --port        Remote port (auto-detected if omitted)
+    -b, --dbname      Database name in URL (defaults to -d value)
+
+  :DBDisconnect       Stop port-forward and remove connection
+
+Local Databases ~
+  Use <leader>da to add a local connection URL directly:
+    postgres://user:pass@localhost:5432/mydb
+    mysql://root@localhost:3306/mydb
+    sqlite:path/to/db.sqlite
+
+SQL Completion ~
+  Autocompletion for table and column names is active in .sql files
+  when a dadbod connection is configured.
+
+==============================================================================
+KUBERNETES                                        *cheatsheet-kubernetes*
+
+Pod Connection (:PodConnect) ~
+  <leader>ks        Shell into pod (prompts for context/ns/app)
+  <leader>kl        Tail pod logs
+  <leader>kf        Port-forward pod
+
+  :PodConnect -c <ctx> -n <ns> -a <app>                 Shell (default)
+  :PodConnect -c <ctx> -n <ns> -a <app> logs             Tail logs
+  :PodConnect -c <ctx> -n <ns> -a <app> forward 3000:3000
+
+  All actions open in a terminal split. Close the buffer to stop.
+
+Shell Scripts (~/.local/bin/) ~
+  remote-db-connect -c <ctx> -n <ns> -d <db> [-p <port>]
+  remote-pod-connect -c <ctx> -n <ns> -a <app> [shell|forward|logs]
+
+==============================================================================
+MARKDOWN                                            *cheatsheet-markdown*
+
+  <leader>mp        Toggle live preview in browser
+
+  Opens a browser tab that auto-refreshes as you edit.
+  Tab closes automatically when you leave the buffer.
+
+==============================================================================
 UI & MISC                                              *cheatsheet-ui*
 
 Undo Tree ~
@@ -306,7 +368,7 @@ Noice (messages) ~
 
 Which-Key ~
   Press <leader> and wait ~300ms to see all available bindings.
-  Each group is labeled: Buffer, Code, Debug, Find, Git, etc.
+  Each group is labeled: Buffer, Code, Debug, Find, Git, Kubernetes, etc.
 
 ==============================================================================
 PLUGIN MANAGEMENT                                  *cheatsheet-plugins*
@@ -330,6 +392,8 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
   ,f...             Find (Telescope)
   ,g...             Git (lazygit, diffview)
   ,h...             Hunk (gitsigns)
+  ,k...             Kubernetes (pod connect)
+  ,m...             Markdown (preview)
   ,q...             Session (persistence)
   ,r...             Refactor (rename)
   ,s...             Surround shortcuts
@@ -338,6 +402,7 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
   ,w                Save
   ,q                Quit
   ,t                File tree
+  ,F                Find file in tree
   ,e                Line diagnostic
   ,n                Toggle relative numbers
   ,S                Strip whitespace
@@ -345,6 +410,12 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
   ,D                Hover docs
   ,a / ,A           Swap argument next/prev
   ,<space>          Clear search highlight
+
+  Database:
+  ,du               Toggle DBUI
+  ,da               Add DB connection
+  ,dc               Connect remote DB
+  ,dd               Disconnect remote DB
 
 ==============================================================================
  vim:tw=78:ts=8:ft=help:norl:

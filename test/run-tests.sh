@@ -98,6 +98,17 @@ CONF
     check ~/.zsh/aliases.zsh
     check ~/.zsh/functions/extract.zsh
     check ~/.config/nvim/init.lua
+    check ~/.config/nvim/lua/options.lua
+    check ~/.config/nvim/lua/keymaps.lua
+    check ~/.config/nvim/lua/autocmds.lua
+    check ~/.config/nvim/lua/plugins/lsp.lua
+    check ~/.config/nvim/lua/plugins/editor.lua
+    check ~/.config/nvim/lua/plugins/ui.lua
+    check ~/.config/nvim/lua/plugins/dap.lua
+    check ~/.config/nvim/lua/plugins/database.lua
+    check ~/.config/nvim/lua/plugins/kubernetes.lua
+    check ~/.local/bin/remote-db-connect
+    check ~/.local/bin/remote-pod-connect
     check ~/.git_template/ctags
 
     # Validate gitconfig was templated correctly

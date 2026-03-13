@@ -145,6 +145,8 @@ return {
         { "<leader>q", group = "Session" },
         { "<leader>r", group = "Refactor" },
         { "<leader>s", group = "Surround" },
+        { "<leader>k", group = "Kubernetes" },
+        { "<leader>m", group = "Markdown" },
         { "<leader>x", group = "Diagnostics" },
         { "<leader>?", function() vim.cmd("Telescope keymaps") end, desc = "Search all keymaps" },
         { "<leader>/", function() vim.cmd("help cheatsheet") end, desc = "Cheatsheet" },

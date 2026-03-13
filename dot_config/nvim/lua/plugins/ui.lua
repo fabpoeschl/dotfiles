@@ -39,7 +39,7 @@ return {
     dependencies = { "nvim-tree/nvim-web-devicons" },
     keys = {
       { "<leader>t", ":NvimTreeToggle<CR>", desc = "Toggle file tree" },
-      { "<leader>f", ":NvimTreeFindFile<CR>", desc = "Find file in tree" },
+      { "<leader>F", ":NvimTreeFindFile<CR>", desc = "Find file in tree" },
     },
     opts = {
       view = { width = 35 },

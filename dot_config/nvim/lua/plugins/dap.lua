@@ -8,7 +8,7 @@ return {
         "rcarriga/nvim-dap-ui",
         dependencies = { "nvim-neotest/nvim-nio" },
         keys = {
-          { "<leader>du", function() require("dapui").toggle() end, desc = "Toggle DAP UI" },
+          { "<leader>di", function() require("dapui").toggle() end, desc = "Toggle DAP UI" },
           { "<leader>de", function() require("dapui").eval() end, desc = "Eval expression", mode = { "n", "v" } },
         },
         config = function()
@@ -74,7 +74,7 @@ return {
       { "<leader>dl", function() require("dap").set_breakpoint(nil, nil, vim.fn.input("Log: ")) end, desc = "Log point" },
 
       -- Session control
-      { "<leader>dc", function() require("dap").continue() end, desc = "Continue" },
+      { "<leader>dx", function() require("dap").continue() end, desc = "Continue" },
       { "<leader>dr", function() require("dap").restart() end, desc = "Restart" },
       { "<leader>dq", function() require("dap").terminate() end, desc = "Terminate" },
       { "<leader>dp", function() require("dap").pause() end, desc = "Pause" },

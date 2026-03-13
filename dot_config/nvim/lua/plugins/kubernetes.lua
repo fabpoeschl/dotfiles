@@ -1,13 +1,13 @@
 return {
   {
-    "neovim/nvim-lspconfig",
-    optional = true,
+    "nvim-lua/plenary.nvim",
+    lazy = true,
     keys = {
       { "<leader>ks", "<cmd>PodConnect shell<CR>", desc = "Shell into pod" },
       { "<leader>kl", "<cmd>PodConnect logs<CR>", desc = "Tail pod logs" },
       { "<leader>kf", "<cmd>PodConnect forward<CR>", desc = "Port-forward pod" },
     },
-    config = function(_, opts)
+    config = function()
       -- Find a running pod by name substring (async)
       local function find_pod(context, namespace, app, callback)
         vim.system(

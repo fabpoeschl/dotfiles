@@ -139,11 +139,10 @@ return {
 
             vim.notify("DBConnect: found pod " .. pod)
 
-            -- Step 2: Fetch password from secret
+            -- Step 2: Fetch secret as JSON and extract the key safely
             vim.system(
               { "kubectl", "--context", context, "-n", namespace,
-                "get", "secret", secret,
-                "-o", "jsonpath={.data." .. secret_key .. "}" },
+                "get", "secret", secret, "-o", "json" },
               {},
               vim.schedule_wrap(function(secret_result)
                 if secret_result.code ~= 0 then
@@ -151,10 +150,22 @@ return {
                   return
                 end
 
+                local ok, secret_json = pcall(vim.json.decode, secret_result.stdout)
+                if not ok or not secret_json or not secret_json.data then
+                  vim.notify("DBConnect: failed to parse secret JSON", vim.log.levels.ERROR)
+                  return
+                end
+
+                local encoded_value = secret_json.data[secret_key]
+                if not encoded_value or encoded_value == "" then
+                  vim.notify("DBConnect: key '" .. secret_key .. "' not found in secret '" .. secret .. "'", vim.log.levels.ERROR)
+                  return
+                end
+
                 -- Decode base64
                 vim.system(
                   { "base64", "-d" },
-                  { stdin = secret_result.stdout },
+                  { stdin = encoded_value },
                   vim.schedule_wrap(function(decode_result)
                     if decode_result.code ~= 0 then
                       vim.notify("DBConnect: failed to decode secret", vim.log.levels.ERROR)
@@ -163,7 +174,7 @@ return {
 
                     local password = decode_result.stdout:gsub("%s+$", "")
                     if password == "" then
-                      vim.notify("DBConnect: secret key '" .. secret_key .. "' is empty", vim.log.levels.ERROR)
+                      vim.notify("DBConnect: secret key '" .. secret_key .. "' decoded to empty string", vim.log.levels.ERROR)
                       return
                     end
 
