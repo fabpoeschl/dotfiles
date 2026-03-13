@@ -2,7 +2,7 @@
 # Connect to an application pod in a Kubernetes cluster.
 #
 # Usage:
-#   remote-pod-connect <context> <namespace> <app-name> [action]
+#   remote-pod-connect -c <context> -n <namespace> -a <app-name> [action] [args...]
 #
 # Actions:
 #   shell   (default) Open an interactive shell in the pod
@@ -10,18 +10,19 @@
 #   logs    Tail the pod logs
 #
 # Examples:
-#   kpf-app staging my-ns my-api                     # shell into the pod
-#   kpf-app staging my-ns my-api forward 3000:3000   # port-forward
-#   kpf-app staging my-ns my-api logs                # tail logs
+#   remote-pod-connect -c staging -n my-ns -a my-api
+#   remote-pod-connect -c staging -n my-ns -a my-api forward 3000:3000
+#   remote-pod-connect -c staging -n my-ns -a my-api logs
 
 set -euo pipefail
 
 usage() {
-  echo "Usage: remote-pod-connect <context> <namespace> <app-name> [action] [args...]"
+  echo "Usage: remote-pod-connect -c <context> -n <namespace> -a <app> [action] [args...]"
   echo ""
-  echo "  context    Kubernetes context (e.g. staging, production)"
-  echo "  namespace  Kubernetes namespace"
-  echo "  app-name   Substring to match against pod names"
+  echo "Options:"
+  echo "  -c, --context       Kubernetes context (e.g. staging, production)"
+  echo "  -n, --namespace     Kubernetes namespace"
+  echo "  -a, --application   Substring to match against pod names"
   echo ""
   echo "Actions:"
   echo "  shell                          Open a shell (default)"
@@ -29,20 +30,32 @@ usage() {
   echo "  logs                           Tail pod logs"
   echo ""
   echo "Examples:"
-  echo "  remote-pod-connect staging my-ns my-api"
-  echo "  remote-pod-connect staging my-ns my-api forward 3000:3000"
-  echo "  remote-pod-connect staging my-ns my-api forward 3000:3000 5678:5678"
-  echo "  remote-pod-connect staging my-ns my-api logs"
+  echo "  remote-pod-connect -c staging -n my-ns -a my-api"
+  echo "  remote-pod-connect -c staging -n my-ns -a my-api forward 3000:3000"
+  echo "  remote-pod-connect -c staging -n my-ns -a my-api forward 3000:3000 5678:5678"
+  echo "  remote-pod-connect -c staging -n my-ns -a my-api logs"
   exit 1
 }
 
-[[ $# -lt 3 ]] && usage
+CONTEXT=""
+NAMESPACE=""
+APP_NAME=""
 
-CONTEXT="$1"
-NAMESPACE="$2"
-APP_NAME="$3"
-ACTION="${4:-shell}"
-shift 3; [[ $# -gt 0 ]] && shift  # consume action arg
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|--context)     CONTEXT="$2";   shift 2 ;;
+    -n|--namespace)   NAMESPACE="$2"; shift 2 ;;
+    -a|--application) APP_NAME="$2";  shift 2 ;;
+    -h|--help)        usage ;;
+    -*)               echo "Error: unknown option '$1'"; usage ;;
+    *)                break ;;  # remaining args are action + action args
+  esac
+done
+
+[[ -z "$CONTEXT" || -z "$NAMESPACE" || -z "$APP_NAME" ]] && usage
+
+ACTION="${1:-shell}"
+[[ $# -gt 0 ]] && shift  # consume action arg
 
 # Find the pod
 POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \

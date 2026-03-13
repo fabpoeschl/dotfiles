@@ -2,8 +2,7 @@
 # Port-forward a database pod from a Kubernetes cluster.
 #
 # Usage:
-#   remote-db-connect <context> <namespace> <database-name>
-#   remote-db-connect staging my-namespace my-postgres
+#   remote-db-connect -c <context> -n <namespace> -d <database-name>
 #
 # Finds the first pod whose name contains <database-name> in the given
 # namespace/context and forwards its database port to localhost.
@@ -12,23 +11,34 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: remote-db-connect <context> <namespace> <database-name>"
+  echo "Usage: remote-db-connect -c <context> -n <namespace> -d <database>"
   echo ""
-  echo "  context        Kubernetes context (e.g. staging, production)"
-  echo "  namespace      Kubernetes namespace"
-  echo "  database-name  Substring to match against pod names (e.g. postgres, redis)"
+  echo "Options:"
+  echo "  -c, --context     Kubernetes context (e.g. staging, production)"
+  echo "  -n, --namespace   Kubernetes namespace"
+  echo "  -d, --database    Substring to match against pod names (e.g. postgres, redis)"
   echo ""
   echo "Examples:"
-  echo "  remote-db-connect staging my-ns my-postgres"
-  echo "  remote-db-connect production payments redis"
+  echo "  remote-db-connect -c staging -n my-ns -d my-postgres"
+  echo "  remote-db-connect --context production --namespace payments --database redis"
   exit 1
 }
 
-[[ $# -lt 3 ]] && usage
+CONTEXT=""
+NAMESPACE=""
+DB_NAME=""
 
-CONTEXT="$1"
-NAMESPACE="$2"
-DB_NAME="$3"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|--context)   CONTEXT="$2";   shift 2 ;;
+    -n|--namespace) NAMESPACE="$2"; shift 2 ;;
+    -d|--database)  DB_NAME="$2";   shift 2 ;;
+    -h|--help)      usage ;;
+    *)              echo "Error: unknown option '$1'"; usage ;;
+  esac
+done
+
+[[ -z "$CONTEXT" || -z "$NAMESPACE" || -z "$DB_NAME" ]] && usage
 
 # Find the pod
 POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
