@@ -1,0 +1,87 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "small_model": "anthropic/claude-haiku-4-5-20251001",
+  "agent": {
+    "planning": {
+      "mode": "primary",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Strategic planning agent for breaking down tasks and designing solutions",
+      "prompt": "You are a planning agent. Analyze the codebase, break down tasks into clear steps, and design solutions. Do not make any changes to files — only produce plans.",
+      "color": "#7C3AED",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": false,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": true
+      }
+    },
+    "plan-review": {
+      "mode": "primary",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews plans for correctness, completeness, and potential issues before implementation",
+      "prompt": "You are a plan review agent. Critically evaluate plans for feasibility, completeness, edge cases, and potential risks. Suggest improvements but do not modify any files.",
+      "color": "#F59E0B",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": false,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": true
+      }
+    },
+    "implementation": {
+      "mode": "primary",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Implementation agent with full tool access for writing and modifying code",
+      "prompt": "You are an implementation agent. Execute the plan by writing clean, well-structured code. You have full access to all tools.",
+      "color": "#10B981",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": true,
+        "todoread": true,
+        "todowrite": true
+      }
+    },
+    "code-review": {
+      "mode": "primary",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews code for quality, security, performance, and best practices",
+      "prompt": "You are a code review agent. Review code changes for security vulnerabilities, performance issues, maintainability, and adherence to best practices. Provide actionable feedback but do not modify files.",
+      "color": "#EF4444",
+      "tools": {
+        "read": true,
+        "write": false,
+        "edit": false,
+        "bash": true,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": false
+      }
+    }
+  }
+}

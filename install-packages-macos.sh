@@ -109,6 +109,14 @@ cd ${current_dir}
 
 brew install --cask slack
 
+# opencode
+brew install opencode-ai/tap/opencode
+if type -p opencode > /dev/null; then
+	echo "opencode installed" >> $log_file
+else
+	echo "Failed to install opencode!" >> $log_file
+fi
+
 # =================
 # summary
 # =================

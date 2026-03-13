@@ -157,12 +157,20 @@ else
 	echo "Failed to install spotify!" >> $log_file
 fi
 
-# chrome 
+# chrome
 sudo apt-get -y install google-chrome-stable
 if type -p google-chrome > /dev/null; then
 	echo "chrome installed" >> $log_file
 else
 	echo "Failed to install chrome!" >> $log_file
+fi
+
+# opencode
+curl -fsSL https://opencode.ai/install | bash
+if type -p opencode > /dev/null; then
+	echo "opencode installed" >> $log_file
+else
+	echo "Failed to install opencode!" >> $log_file
 fi
 
 # =================
