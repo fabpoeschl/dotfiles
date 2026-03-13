@@ -147,7 +147,7 @@ return {
           request = "attach",
           connect = { host = "127.0.0.1", port = 5678 },
           pathMappings = {
-            { localRoot = "${workspaceFolder}", remoteRoot = "." },
+            { localRoot = "${workspaceFolder}", remoteRoot = "/app" },
           },
         },
         {
@@ -198,6 +198,8 @@ return {
             request = "attach",
             port = 9229,
             cwd = "${workspaceFolder}",
+            localRoot = "${workspaceFolder}",
+            remoteRoot = "/app",
             restart = true,
           },
           {
@@ -207,6 +209,8 @@ return {
             address = function() return vim.fn.input("Host: ", "127.0.0.1") end,
             port = function() return tonumber(vim.fn.input("Port: ", "9229")) end,
             cwd = "${workspaceFolder}",
+            localRoot = "${workspaceFolder}",
+            remoteRoot = function() return vim.fn.input("Remote path: ", "/app") end,
             restart = true,
           },
           {
