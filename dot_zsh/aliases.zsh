@@ -83,6 +83,10 @@ alias oc-mongo-premium-dev='LOCAL_PORT=27011 && oc project dev-premium-dev && oc
 # Docker
 alias start-docker-machine='docker-machine start && eval "$(docker-machine env default)"'
 
+# Podman as Docker drop-in
+alias docker='podman'
+alias docker-compose='podman-compose'
+
 # bat (syntax-highlighted cat)
 if command -v bat &>/dev/null; then
   alias cat='bat --paging=never'

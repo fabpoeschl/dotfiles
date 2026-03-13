@@ -5,7 +5,7 @@
 # Brewfile hash: {{ include "Brewfile" | sha256sum }}
 # packages.txt hash: {{ include "packages.txt" | sha256sum }}
 
-set -euo pipefail
+set -uo pipefail
 
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
@@ -40,7 +40,7 @@ elif [[ "$OS" == "Linux" ]]; then
 
   # mise (not in apt)
   if ! command -v mise &>/dev/null; then
-    curl https://mise.run | sh && info "mise installed" || error "mise failed to install"
+    curl -fsSL https://mise.run | sh && info "mise installed" || error "mise failed to install"
   else
     warn "mise already installed"
   fi
