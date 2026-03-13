@@ -41,9 +41,6 @@ map("n", "td", ":tabclose<CR>")
 -- Highlight last inserted text
 map("n", "gV", "`[v`]")
 
--- Session
-map("n", "<leader>s", ":mksession<CR>")
-
 -- Diff
 map("n", "<leader>df", ":diffthis<CR>")
 

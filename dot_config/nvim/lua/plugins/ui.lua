@@ -29,7 +29,7 @@ return {
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
-      extensions = { "nvim-tree", "lazy", "fugitive" },
+      extensions = { "nvim-tree", "lazy", "fugitive", "trouble" },
     },
   },
 
@@ -88,6 +88,80 @@ return {
     opts = {
       indent = { char = "│" },
       scope = { enabled = true },
+    },
+  },
+
+  -- Buffer tabs (replaces airline tabline)
+  {
+    "akinsho/bufferline.nvim",
+    version = "*",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    event = "VeryLazy",
+    keys = {
+      { "<leader>bp", "<cmd>BufferLineTogglePin<CR>", desc = "Pin buffer" },
+      { "<leader>bo", "<cmd>BufferLineCloseOthers<CR>", desc = "Close other buffers" },
+      { "<S-h>", "<cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" },
+      { "<S-l>", "<cmd>BufferLineCycleNext<CR>", desc = "Next buffer" },
+    },
+    opts = {
+      options = {
+        diagnostics = "nvim_lsp",
+        offsets = {
+          { filetype = "NvimTree", text = "File Explorer", highlight = "Directory", separator = true },
+        },
+        show_close_icon = false,
+        show_buffer_close_icons = false,
+      },
+    },
+  },
+
+  -- LSP progress indicator
+  {
+    "j-hui/fidget.nvim",
+    event = "LspAttach",
+    opts = {
+      notification = {
+        window = { winblend = 0 },
+      },
+    },
+  },
+
+  -- Better vim.ui.select and vim.ui.input
+  {
+    "stevearc/dressing.nvim",
+    event = "VeryLazy",
+    opts = {
+      input = { enabled = true },
+      select = { enabled = true, backend = { "telescope", "builtin" } },
+    },
+  },
+
+  -- Modern UI for messages, cmdline, and popupmenu
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "rcarriga/nvim-notify",
+    },
+    opts = {
+      lsp = {
+        override = {
+          ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+          ["vim.lsp.util.stylize_markdown"] = true,
+          ["cmp.entry.get_documentation"] = true,
+        },
+      },
+      routes = {
+        -- Skip "written" messages
+        { filter = { event = "msg_show", kind = "", find = "written" }, opts = { skip = true } },
+      },
+      presets = {
+        bottom_search = true,
+        command_palette = true,
+        long_message_to_split = true,
+        lsp_doc_border = true,
+      },
     },
   },
 }
