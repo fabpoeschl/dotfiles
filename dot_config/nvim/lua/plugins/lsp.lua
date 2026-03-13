@@ -16,6 +16,7 @@ return {
         "solargraph",    -- Ruby (carried over from coc-solargraph)
         "ts_ls",         -- TypeScript/JavaScript
         "pyright",       -- Python
+        "helm_ls",       -- Helm charts
       },
       automatic_installation = true,
     },
@@ -50,7 +51,7 @@ return {
       end
 
       -- Configure each server
-      local servers = { "solargraph", "ts_ls", "pyright" }
+      local servers = { "solargraph", "ts_ls", "pyright", "helm_ls" }
       for _, server in ipairs(servers) do
         lspconfig[server].setup({
           capabilities = capabilities,

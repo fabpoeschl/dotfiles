@@ -27,6 +27,15 @@ autocmd("VimResized", {
   command = "tabdo wincmd =",
 })
 
+-- Detect Helm template files
+autocmd({ "BufRead", "BufNewFile" }, {
+  group = augroup("HelmFiletype", {}),
+  pattern = "*/templates/*.yaml",
+  callback = function()
+    vim.bo.filetype = "helm"
+  end,
+})
+
 -- Remove trailing whitespace on save (opt-in per filetype)
 autocmd("BufWritePre", {
   group = augroup("TrimWhitespace", {}),
