@@ -66,8 +66,8 @@
     "plan-review": {
       "mode": "primary",
       "model": "anthropic/claude-sonnet-4-20250514",
-      "description": "Reviews plans for correctness, completeness, and potential issues before implementation",
-      "prompt": "You are a plan review agent. Critically evaluate plans for feasibility, completeness, edge cases, and potential risks. Write review feedback as markdown files.",
+      "description": "Orchestrates a structured review of the plan through functional, architecture, performance, security, and QA review steps",
+      "prompt": "You are a plan review orchestrator. Conduct a structured review of the plan by running each review subagent in order:\n\n1. functional-review — validate requirements coverage and logical correctness\n2. architecture-review — evaluate structure, patterns, and scalability\n3. performance-review — identify bottlenecks and resource concerns\n4. security-review — find vulnerabilities and compliance gaps\n5. qa-review — assess testability, coverage, and quality gates\n\nEach subagent produces a markdown document. After all five reviews are complete, consolidate the findings and update the plan document with fixes for critical issues and bugs, resolutions for minor issues, and a section for accepted improvement suggestions.",
       "color": "#F59E0B",
       "tools": {
         "read": true,
@@ -106,9 +106,109 @@
     "code-review": {
       "mode": "primary",
       "model": "anthropic/claude-sonnet-4-20250514",
-      "description": "Reviews code for quality, security, performance, and best practices",
-      "prompt": "You are a code review agent. Review code changes for security vulnerabilities, performance issues, maintainability, and adherence to best practices. Write review feedback as markdown files.",
+      "description": "Orchestrates a structured review of implemented code through functional, architecture, performance, security, and QA review steps",
+      "prompt": "You are a code review orchestrator. Conduct a structured review of the implementation by running each review subagent in order:\n\n1. functional-review — verify the code fulfills requirements and behaves correctly\n2. architecture-review — evaluate code structure, patterns, and maintainability\n3. performance-review — identify bottlenecks, inefficiencies, and resource issues\n4. security-review — find vulnerabilities, injection risks, and auth/access issues\n5. qa-review — assess test coverage, edge cases, and quality gates\n\nEach subagent produces a markdown document. After all five reviews are complete, consolidate the findings and update the implementation with fixes for critical issues and bugs, resolutions for minor issues, and a section for accepted improvement suggestions.",
       "color": "#EF4444",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": true
+      }
+    },
+    "functional-review": {
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews for functional correctness — does it meet requirements and behave as expected",
+      "prompt": "You are a functional review agent. Evaluate whether the plan or code correctly fulfills the stated requirements and behaves as expected.\n\nProduce a markdown document with exactly these four sections:\n\n## Critical Issues\nBlocking problems that prevent correct functionality.\n\n## Bugs\nDefects that cause incorrect behavior in specific scenarios.\n\n## Minor Issues\nSmall functional gaps or edge cases that should be addressed.\n\n## Improvement Suggestions\nOptional enhancements to improve functional completeness or clarity.",
+      "color": "#F59E0B",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": false,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": false
+      }
+    },
+    "architecture-review": {
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews architecture — structure, patterns, scalability, and maintainability",
+      "prompt": "You are an architecture review agent. Evaluate the structural design, patterns, modularity, scalability, and maintainability of the plan or code.\n\nProduce a markdown document with exactly these four sections:\n\n## Critical Issues\nFundamental architectural flaws that will cause major problems at scale or block future development.\n\n## Bugs\nStructural defects such as circular dependencies, incorrect layering, or broken abstractions.\n\n## Minor Issues\nSmall structural concerns like inconsistent naming, unnecessary coupling, or missing interfaces.\n\n## Improvement Suggestions\nOptional enhancements to improve modularity, extensibility, or alignment with established patterns.",
+      "color": "#F59E0B",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": false,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": false
+      }
+    },
+    "performance-review": {
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews performance — bottlenecks, resource usage, and efficiency",
+      "prompt": "You are a performance review agent. Evaluate the plan or code for performance bottlenecks, resource usage, algorithmic efficiency, and scalability under load.\n\nProduce a markdown document with exactly these four sections:\n\n## Critical Issues\nPerformance problems that will cause failures, timeouts, or unacceptable latency in production.\n\n## Bugs\nInefficiencies that cause measurable degradation such as N+1 queries, memory leaks, or unbounded growth.\n\n## Minor Issues\nSmall inefficiencies like unnecessary allocations, suboptimal data structures, or missing caching opportunities.\n\n## Improvement Suggestions\nOptional optimizations for better throughput, lower latency, or reduced resource consumption.",
+      "color": "#F59E0B",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": false,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": false
+      }
+    },
+    "security-review": {
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews security — vulnerabilities, injection risks, auth, and data protection",
+      "prompt": "You are a security review agent. Evaluate the plan or code for security vulnerabilities, injection risks, authentication and authorization issues, data protection, and compliance concerns.\n\nProduce a markdown document with exactly these four sections:\n\n## Critical Issues\nExploitable vulnerabilities that pose immediate risk such as injection, auth bypass, or data exposure.\n\n## Bugs\nSecurity defects like missing input validation, improper error handling exposing internals, or weak defaults.\n\n## Minor Issues\nSmall security hygiene concerns such as overly permissive configurations, missing headers, or verbose logging.\n\n## Improvement Suggestions\nOptional hardening measures like rate limiting, additional audit logging, or defense-in-depth layers.",
+      "color": "#F59E0B",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": false,
+        "grep": true,
+        "glob": true,
+        "list": true,
+        "webfetch": true,
+        "patch": false,
+        "todoread": true,
+        "todowrite": false
+      }
+    },
+    "qa-review": {
+      "mode": "subagent",
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "description": "Reviews QA and testing — coverage, edge cases, testability, and quality gates",
+      "prompt": "You are a QA and test review agent. Evaluate the plan or code for test coverage, edge case handling, testability, and quality assurance completeness.\n\nProduce a markdown document with exactly these four sections:\n\n## Critical Issues\nMissing tests for critical paths, untestable components, or broken quality gates that block release.\n\n## Bugs\nGaps in test coverage, incorrect test assertions, or flaky tests that mask real failures.\n\n## Minor Issues\nSmall testing gaps like missing edge cases, incomplete mocks, or inconsistent test naming.\n\n## Improvement Suggestions\nOptional enhancements like property-based testing, integration test improvements, or better test data management.",
+      "color": "#F59E0B",
       "tools": {
         "read": true,
         "write": true,
