@@ -24,10 +24,10 @@ return {
       -- Track active port-forward jobs: { name = { job_id, local_port } }
       local active_connections = {}
 
-      -- :DBConnect -c <context> -n <namespace> -d <database> [-s <secret>] [-k <key>] [-u <user>] [-p <port>]
+      -- :DBConnect -c <context> -n <namespace> -d <database> [-s <secret>] [-k <key>] [-u <user>] [-p <remote-port>]
       vim.api.nvim_create_user_command("DBConnect", function(opts)
         local args = opts.fargs
-        local context, namespace, database, secret, secret_key, user, local_port
+        local context, namespace, database, secret, secret_key, user, port_override
 
         local i = 1
         while i <= #args do
@@ -39,7 +39,7 @@ return {
           elseif flag == "-s" or flag == "--secret" then secret = val
           elseif flag == "-k" or flag == "--key" then secret_key = val
           elseif flag == "-u" or flag == "--user" then user = val
-          elseif flag == "-p" or flag == "--port" then local_port = val
+          elseif flag == "-p" or flag == "--port" then port_override = val
           else
             vim.notify("DBConnect: unknown flag " .. flag, vim.log.levels.ERROR)
             return
@@ -62,10 +62,12 @@ return {
         secret_key = secret_key or "password"
         user = user or "postgres"
 
-        -- Detect remote port from database name
+        -- Detect remote port from database name (or use override)
         local db_lower = database:lower()
         local remote_port
-        if db_lower:match("postgres") or db_lower:match("pgsql") or db_lower:match("pg") then
+        if port_override then
+          remote_port = tonumber(port_override)
+        elseif db_lower:match("postgres") or db_lower:match("pgsql") or db_lower:match("pg") then
           remote_port = 5432
         elseif db_lower:match("mysql") or db_lower:match("maria") then
           remote_port = 3306
@@ -76,7 +78,7 @@ return {
         else
           remote_port = 5432
         end
-        local_port = local_port or tostring(remote_port)
+        local local_port = tostring(remote_port)
 
         local conn_name = context .. "/" .. namespace .. "/" .. database
 
