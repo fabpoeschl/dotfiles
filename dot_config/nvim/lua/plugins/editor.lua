@@ -154,6 +154,12 @@ return {
     end,
   },
 
+  -- Claude Code integration (shares open files, selections with CLI)
+  {
+    "anthropics/claudecode.nvim",
+    opts = {},
+  },
+
   -- Undo tree (replaces gundo)
   {
     "mbbill/undotree",
