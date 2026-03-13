@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Port-forward a database pod from a Kubernetes cluster.
+#
+# Usage:
+#   kpf-db <context> <namespace> <database-name>
+#   kpf-db staging my-namespace my-postgres
+#
+# Finds the first pod whose name contains <database-name> in the given
+# namespace/context and forwards its database port to localhost.
+# Supports PostgreSQL (5432), MySQL (3306), Redis (6379), and MongoDB (27017).
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: kpf-db <context> <namespace> <database-name>"
+  echo ""
+  echo "  context        Kubernetes context (e.g. staging, production)"
+  echo "  namespace      Kubernetes namespace"
+  echo "  database-name  Substring to match against pod names (e.g. postgres, redis)"
+  echo ""
+  echo "Examples:"
+  echo "  kpf-db staging my-ns my-postgres"
+  echo "  kpf-db production payments redis"
+  exit 1
+}
+
+[[ $# -lt 3 ]] && usage
+
+CONTEXT="$1"
+NAMESPACE="$2"
+DB_NAME="$3"
+
+# Find the pod
+POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
+  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep "$DB_NAME" | head -1)
+
+if [[ -z "$POD" ]]; then
+  echo "Error: no pod matching '$DB_NAME' found in $NAMESPACE (context: $CONTEXT)"
+  exit 1
+fi
+
+echo "Found pod: $POD"
+
+# Detect database type and pick the right port
+detect_port() {
+  local name="${DB_NAME,,}"
+  case "$name" in
+    *postgres*|*pg*|*pgsql*)  echo 5432 ;;
+    *mysql*|*maria*)          echo 3306 ;;
+    *redis*)                  echo 6379 ;;
+    *mongo*)                  echo 27017 ;;
+    *)
+      # Fall back to inspecting the container ports
+      local port
+      port=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pod "$POD" \
+        -o jsonpath='{.spec.containers[0].ports[0].containerPort}' 2>/dev/null)
+      if [[ -n "$port" ]]; then
+        echo "$port"
+      else
+        echo ""
+      fi
+      ;;
+  esac
+}
+
+REMOTE_PORT=$(detect_port)
+
+if [[ -z "$REMOTE_PORT" ]]; then
+  echo "Error: could not detect database port. Specify it manually:"
+  echo "  kubectl --context $CONTEXT -n $NAMESPACE port-forward $POD <local>:<remote>"
+  exit 1
+fi
+
+LOCAL_PORT="$REMOTE_PORT"
+
+echo "Port-forwarding localhost:$LOCAL_PORT → $POD:$REMOTE_PORT"
+echo "Press Ctrl-C to stop"
+echo ""
+exec kubectl --context "$CONTEXT" -n "$NAMESPACE" port-forward "$POD" "$LOCAL_PORT:$REMOTE_PORT"

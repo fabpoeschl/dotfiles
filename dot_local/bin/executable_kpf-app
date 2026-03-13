@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Connect to an application pod in a Kubernetes cluster.
+#
+# Usage:
+#   kpf-app <context> <namespace> <app-name> [action]
+#
+# Actions:
+#   shell   (default) Open an interactive shell in the pod
+#   forward <local-port>:<remote-port>  Port-forward to the pod
+#   logs    Tail the pod logs
+#
+# Examples:
+#   kpf-app staging my-ns my-api                     # shell into the pod
+#   kpf-app staging my-ns my-api forward 3000:3000   # port-forward
+#   kpf-app staging my-ns my-api logs                # tail logs
+
+set -euo pipefail
+
+usage() {
+  echo "Usage: kpf-app <context> <namespace> <app-name> [action] [args...]"
+  echo ""
+  echo "  context    Kubernetes context (e.g. staging, production)"
+  echo "  namespace  Kubernetes namespace"
+  echo "  app-name   Substring to match against pod names"
+  echo ""
+  echo "Actions:"
+  echo "  shell                          Open a shell (default)"
+  echo "  forward <local:remote> [...]   Port-forward (multiple mappings allowed)"
+  echo "  logs                           Tail pod logs"
+  echo ""
+  echo "Examples:"
+  echo "  kpf-app staging my-ns my-api"
+  echo "  kpf-app staging my-ns my-api forward 3000:3000"
+  echo "  kpf-app staging my-ns my-api forward 3000:3000 5678:5678"
+  echo "  kpf-app staging my-ns my-api logs"
+  exit 1
+}
+
+[[ $# -lt 3 ]] && usage
+
+CONTEXT="$1"
+NAMESPACE="$2"
+APP_NAME="$3"
+ACTION="${4:-shell}"
+shift 3; [[ $# -gt 0 ]] && shift  # consume action arg
+
+# Find the pod
+POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
+  --field-selector=status.phase=Running \
+  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep "$APP_NAME" | head -1)
+
+if [[ -z "$POD" ]]; then
+  echo "Error: no running pod matching '$APP_NAME' found in $NAMESPACE (context: $CONTEXT)"
+  exit 1
+fi
+
+echo "Found pod: $POD"
+
+case "$ACTION" in
+  shell)
+    # Try bash first, fall back to sh
+    echo "Opening shell..."
+    kubectl --context "$CONTEXT" -n "$NAMESPACE" exec -it "$POD" -- bash 2>/dev/null \
+      || kubectl --context "$CONTEXT" -n "$NAMESPACE" exec -it "$POD" -- sh
+    ;;
+
+  forward)
+    if [[ $# -lt 1 ]]; then
+      echo "Error: forward requires at least one port mapping (e.g. 3000:3000)"
+      exit 1
+    fi
+    echo "Port-forwarding: $*"
+    echo "Press Ctrl-C to stop"
+    echo ""
+    exec kubectl --context "$CONTEXT" -n "$NAMESPACE" port-forward "$POD" "$@"
+    ;;
+
+  logs)
+    exec kubectl --context "$CONTEXT" -n "$NAMESPACE" logs -f "$POD"
+    ;;
+
+  *)
+    echo "Error: unknown action '$ACTION'"
+    usage
+    ;;
+esac

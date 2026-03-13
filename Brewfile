@@ -18,9 +18,10 @@ brew "fzf"
 brew "zoxide"
 brew "lazygit"
 
-# Containers
+# Containers & Kubernetes
 cask "docker"
 brew "docker-compose"
+brew "kubernetes-cli"
 
 # Dev tools
 cask "postman"

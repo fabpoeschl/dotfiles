@@ -19,6 +19,9 @@ git-delta
 fzf
 zoxide
 
+# Kubernetes
+kubectl
+
 # Networking
 openvpn
 
