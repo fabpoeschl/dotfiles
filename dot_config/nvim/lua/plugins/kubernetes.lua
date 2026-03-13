@@ -1,43 +1,56 @@
 return {
   {
-    "fabpoeschl/kubernetes.nvim",
-    virtual = true,
-    name = "kubernetes-commands",
+    "neovim/nvim-lspconfig",
+    optional = true,
     keys = {
       { "<leader>ks", "<cmd>PodConnect shell<CR>", desc = "Shell into pod" },
       { "<leader>kl", "<cmd>PodConnect logs<CR>", desc = "Tail pod logs" },
       { "<leader>kf", "<cmd>PodConnect forward<CR>", desc = "Port-forward pod" },
     },
-    config = function()
-      -- Find a running pod by name substring
-      local function find_pod(context, namespace, app)
-        local cmd = string.format(
-          "kubectl --context %s -n %s get pods --field-selector=status.phase=Running -o jsonpath='{.items[*].metadata.name}'",
-          vim.fn.shellescape(context),
-          vim.fn.shellescape(namespace)
+    config = function(_, opts)
+      -- Find a running pod by name substring (async)
+      local function find_pod(context, namespace, app, callback)
+        vim.system(
+          { "kubectl", "--context", context, "-n", namespace,
+            "get", "pods", "--field-selector=status.phase=Running",
+            "-o", "jsonpath={.items[*].metadata.name}" },
+          {},
+          vim.schedule_wrap(function(result)
+            if result.code ~= 0 then
+              callback(nil, result.stderr or "kubectl failed")
+              return
+            end
+            for name in result.stdout:gmatch("%S+") do
+              if name:find(app, 1, true) then
+                callback(name, nil)
+                return
+              end
+            end
+            callback(nil, "no running pod matching '" .. app .. "'")
+          end)
         )
-        local output = vim.fn.system(cmd)
-        if vim.v.shell_error ~= 0 then
-          return nil
-        end
-        for name in output:gmatch("%S+") do
-          if name:match(app) then
-            return name
-          end
-        end
-        return nil
       end
 
-      -- Parse flags from fargs, return remaining positional args
+      -- Parse flags from fargs, return opts and remaining positional args
       local function parse_args(fargs)
-        local opts = {}
+        local parsed = {}
         local rest = {}
+        local flags = {
+          ["-c"] = "context",   ["--context"]     = "context",
+          ["-n"] = "namespace", ["--namespace"]    = "namespace",
+          ["-a"] = "app",       ["--application"]  = "app",
+        }
         local i = 1
         while i <= #fargs do
           local flag = fargs[i]
-          if flag == "-c" or flag == "--context" then opts.context = fargs[i + 1]; i = i + 2
-          elseif flag == "-n" or flag == "--namespace" then opts.namespace = fargs[i + 1]; i = i + 2
-          elseif flag == "-a" or flag == "--application" then opts.app = fargs[i + 1]; i = i + 2
+          local field = flags[flag]
+          if field then
+            if i + 1 > #fargs then
+              vim.notify("PodConnect: " .. flag .. " requires a value", vim.log.levels.ERROR)
+              return nil
+            end
+            parsed[field] = fargs[i + 1]
+            i = i + 2
           elseif flag:sub(1, 1) == "-" then
             vim.notify("PodConnect: unknown flag " .. flag, vim.log.levels.ERROR)
             return nil
@@ -48,67 +61,73 @@ return {
             break
           end
         end
-        return opts, rest
+        return parsed, rest
       end
 
       -- :PodConnect -c <context> -n <namespace> -a <app> [shell|logs|forward <port:port> ...]
       vim.api.nvim_create_user_command("PodConnect", function(cmd_opts)
-        local opts, rest = parse_args(cmd_opts.fargs)
-        if not opts then return end
+        if vim.fn.executable("kubectl") == 0 then
+          vim.notify("PodConnect: kubectl is not installed or not in PATH", vim.log.levels.ERROR)
+          return
+        end
 
-        opts.context = opts.context or vim.fn.input("Context: ")
-        opts.namespace = opts.namespace or vim.fn.input("Namespace: ")
-        opts.app = opts.app or vim.fn.input("Application: ")
+        local parsed, rest = parse_args(cmd_opts.fargs)
+        if not parsed then return end
 
-        if opts.context == "" or opts.namespace == "" or opts.app == "" then
+        parsed.context = parsed.context or vim.fn.input("Context: ")
+        parsed.namespace = parsed.namespace or vim.fn.input("Namespace: ")
+        parsed.app = parsed.app or vim.fn.input("Application: ")
+
+        if parsed.context == "" or parsed.namespace == "" or parsed.app == "" then
           vim.notify("PodConnect: context, namespace, and application are required", vim.log.levels.ERROR)
           return
         end
 
         local action = rest[1] or "shell"
 
-        local pod = find_pod(opts.context, opts.namespace, opts.app)
-        if not pod then
-          vim.notify("PodConnect: no running pod matching '" .. opts.app .. "'", vim.log.levels.ERROR)
-          return
-        end
-
-        vim.notify("PodConnect: found pod " .. pod)
-
-        local ctx = vim.fn.shellescape(opts.context)
-        local ns = vim.fn.shellescape(opts.namespace)
-        local p = vim.fn.shellescape(pod)
-
-        if action == "shell" then
-          local shell_cmd = string.format(
-            "kubectl --context %s -n %s exec -it %s -- bash 2>/dev/null || kubectl --context %s -n %s exec -it %s -- sh",
-            ctx, ns, p, ctx, ns, p
-          )
-          vim.cmd("botright split | terminal " .. shell_cmd)
-
-        elseif action == "logs" then
-          local logs_cmd = string.format("kubectl --context %s -n %s logs -f %s", ctx, ns, p)
-          vim.cmd("botright split | terminal " .. logs_cmd)
-
-        elseif action == "forward" then
-          local port_args = {}
-          for i = 2, #rest do
-            table.insert(port_args, rest[i])
+        find_pod(parsed.context, parsed.namespace, parsed.app, function(pod, err)
+          if not pod then
+            vim.notify("PodConnect: " .. err, vim.log.levels.ERROR)
+            return
           end
-          if #port_args == 0 then
-            local mapping = vim.fn.input("Port mapping (local:remote): ")
-            if mapping == "" then return end
-            table.insert(port_args, mapping)
-          end
-          local fwd_cmd = string.format(
-            "kubectl --context %s -n %s port-forward %s %s",
-            ctx, ns, p, table.concat(port_args, " ")
-          )
-          vim.cmd("botright split | terminal " .. fwd_cmd)
 
-        else
-          vim.notify("PodConnect: unknown action '" .. action .. "' (use shell, logs, or forward)", vim.log.levels.ERROR)
-        end
+          vim.notify("PodConnect: found pod " .. pod)
+
+          local ctx = vim.fn.shellescape(parsed.context)
+          local ns = vim.fn.shellescape(parsed.namespace)
+          local p = vim.fn.shellescape(pod)
+
+          if action == "shell" then
+            local shell_cmd = string.format(
+              "kubectl --context %s -n %s exec -it %s -- bash 2>/dev/null || kubectl --context %s -n %s exec -it %s -- sh",
+              ctx, ns, p, ctx, ns, p
+            )
+            vim.cmd("botright split | terminal " .. shell_cmd)
+
+          elseif action == "logs" then
+            local logs_cmd = string.format("kubectl --context %s -n %s logs -f %s", ctx, ns, p)
+            vim.cmd("botright split | terminal " .. logs_cmd)
+
+          elseif action == "forward" then
+            local port_args = {}
+            for i = 2, #rest do
+              table.insert(port_args, vim.fn.shellescape(rest[i]))
+            end
+            if #port_args == 0 then
+              local mapping = vim.fn.input("Port mapping (local:remote): ")
+              if mapping == "" then return end
+              table.insert(port_args, vim.fn.shellescape(mapping))
+            end
+            local fwd_cmd = string.format(
+              "kubectl --context %s -n %s port-forward %s %s",
+              ctx, ns, p, table.concat(port_args, " ")
+            )
+            vim.cmd("botright split | terminal " .. fwd_cmd)
+
+          else
+            vim.notify("PodConnect: unknown action '" .. action .. "' (use shell, logs, or forward)", vim.log.levels.ERROR)
+          end
+        end)
       end, {
         nargs = "*",
         desc = "Connect to a remote application pod",

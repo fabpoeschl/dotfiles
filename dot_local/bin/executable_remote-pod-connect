@@ -16,6 +16,11 @@
 
 set -euo pipefail
 
+if ! command -v kubectl &>/dev/null; then
+  echo "Error: kubectl is not installed or not in PATH"
+  exit 1
+fi
+
 usage() {
   echo "Usage: remote-pod-connect -c <context> -n <namespace> -a <app> [action] [args...]"
   echo ""
@@ -43,9 +48,9 @@ APP_NAME=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -c|--context)     CONTEXT="$2";   shift 2 ;;
-    -n|--namespace)   NAMESPACE="$2"; shift 2 ;;
-    -a|--application) APP_NAME="$2";  shift 2 ;;
+    -c|--context)     [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; CONTEXT="$2";   shift 2 ;;
+    -n|--namespace)   [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; NAMESPACE="$2"; shift 2 ;;
+    -a|--application) [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; APP_NAME="$2";  shift 2 ;;
     -h|--help)        usage ;;
     -*)               echo "Error: unknown option '$1'"; usage ;;
     *)                break ;;  # remaining args are action + action args
@@ -57,10 +62,10 @@ done
 ACTION="${1:-shell}"
 [[ $# -gt 0 ]] && shift  # consume action arg
 
-# Find the pod
+# Find a running pod
 POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
   --field-selector=status.phase=Running \
-  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep "$APP_NAME" | head -1)
+  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -F "$APP_NAME" | head -1)
 
 if [[ -z "$POD" ]]; then
   echo "Error: no running pod matching '$APP_NAME' found in $NAMESPACE (context: $CONTEXT)"
