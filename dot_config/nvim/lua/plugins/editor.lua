@@ -132,9 +132,24 @@ return {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
-    opts = {
-      preset = "modern",
-    },
+    config = function()
+      local wk = require("which-key")
+      wk.setup({ preset = "modern" })
+      wk.add({
+        { "<leader>b", group = "Buffer" },
+        { "<leader>c", group = "Code" },
+        { "<leader>d", group = "Diff" },
+        { "<leader>f", group = "Find" },
+        { "<leader>g", group = "Git" },
+        { "<leader>h", group = "Hunk" },
+        { "<leader>q", group = "Session" },
+        { "<leader>r", group = "Refactor" },
+        { "<leader>s", group = "Surround" },
+        { "<leader>x", group = "Diagnostics" },
+        { "<leader>?", function() vim.cmd("Telescope keymaps") end, desc = "Search all keymaps" },
+        { "<leader>/", function() vim.cmd("help cheatsheet") end, desc = "Cheatsheet" },
+      })
+    end,
   },
 
   -- Undo tree (replaces gundo)

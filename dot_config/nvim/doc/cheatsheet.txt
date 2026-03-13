@@ -1,0 +1,278 @@
+*cheatsheet.txt*    Dotfiles Neovim Cheatsheet    Last change: 2026-03-13
+
+==============================================================================
+QUICK REFERENCE                                          *cheatsheet-quickref*
+
+  Leader key: , (comma)
+
+  ,?       Search all keymaps (Telescope)      Interactive keymap finder
+  ,/       Open this cheatsheet                You are here
+
+  Press , and wait for which-key to show all leader groups.
+
+==============================================================================
+NAVIGATION                                           *cheatsheet-navigation*
+
+Movement ~
+  j / k             Move by visual line (not physical line)
+  B                 Beginning of line (like ^)
+  E                 End of line (like $)
+  gV                Highlight last inserted text
+  <C-h/j/k/l>      Navigate between windows
+
+Jump (flash.nvim) ~
+  s                 Flash jump — type 2 chars, pick a label
+  S                 Flash treesitter — select treesitter nodes
+  r                 Remote flash (operator-pending)
+
+Search ~
+  <leader><space>   Clear search highlighting
+  K                 Grep word under cursor -> quickfix
+  <leader>fg        Live grep (Telescope)
+  <leader>fs        Document symbols (Telescope)
+  <leader>fd        Diagnostics (Telescope)
+  <leader>ft        Find TODOs (Telescope)
+
+==============================================================================
+FILE & BUFFER MANAGEMENT                              *cheatsheet-files*
+
+Find Files ~
+  <C-p>             Find files (Telescope)
+  <leader>fr        Recent files (Telescope)
+  <leader>fb        Open buffers (Telescope)
+  <leader>fh        Help tags (Telescope)
+
+File Tree (nvim-tree) ~
+  <leader>t         Toggle file tree
+  <leader>f         Reveal current file in tree
+
+Buffer Tabs (bufferline) ~
+  <S-h>             Previous buffer
+  <S-l>             Next buffer
+  <leader>bp        Pin/unpin buffer
+  <leader>bo        Close all other buffers
+
+Tab Navigation ~
+  <C-t>             New tab
+  th                First tab
+  tk                Next tab
+  tj                Previous tab
+  tl                Last tab
+  tt                Open file in new tab
+  td                Close tab
+
+Sessions (persistence.nvim) ~
+  <leader>qs        Restore session for current directory
+  <leader>ql        Restore last session
+  <leader>qd        Stop auto-saving session
+
+==============================================================================
+EDITING                                              *cheatsheet-editing*
+
+Basic ~
+  <leader>w         Save file (:w!)
+  <leader>q         Quit window
+  <leader>S         Strip trailing whitespace
+  <leader>n         Toggle relative line numbers
+  <space>           Toggle fold
+
+Clipboard ~
+  <leader>y         Yank to system clipboard
+  <leader>x         Cut to system clipboard
+  <leader>p         Paste from system clipboard
+  <C-c>             Copy to system clipboard (normal & visual)
+
+Visual Mode ~
+  J                 Move selected lines down
+  K                 Move selected lines up
+  <                 Indent left (keeps selection)
+  >                 Indent right (keeps selection)
+
+Comment (Comment.nvim) ~
+  gcc               Toggle comment on line
+  gc                Toggle comment on selection (visual)
+
+Surround (nvim-surround) ~
+  ys{motion}{char}  Add surround         e.g. ysiw" → surround word with "
+  ds{char}          Delete surround       e.g. ds" → remove surrounding "
+  cs{old}{new}      Change surround       e.g. cs"' → change " to '
+  S{char}           Surround selection (visual mode)
+
+Auto-Format (conform.nvim) ~
+  <leader>cf        Format buffer manually
+  (auto)            Files are formatted on save automatically
+
+Window Resizing ~
+  <C-Up>            Increase window height
+  <C-Down>          Decrease window height
+  <C-Left>          Decrease window width
+  <C-Right>         Increase window width
+
+==============================================================================
+TEXT OBJECTS (treesitter)                          *cheatsheet-textobjects*
+
+Select ~
+  vaf / vif         Select outer/inner function
+  vac / vic         Select outer/inner class
+  vaa / via         Select outer/inner argument
+  vai / vii         Select outer/inner conditional
+
+Move ~
+  ]m / [m           Next/previous function start
+  ]M / [M           Next/previous function end
+  ]] / [[           Next/previous class start
+  ][ / []           Next/previous class end
+  ]a / [a           Next/previous argument
+
+Swap ~
+  <leader>a         Swap argument with next
+  <leader>A         Swap argument with previous
+
+Incremental Selection ~
+  <C-space>         Start/expand treesitter selection
+  <BS>              Shrink treesitter selection
+
+Extended (mini.ai) ~
+  va) / vi)         Around/inside parentheses (improved)
+  vaq / viq         Around/inside quotes (any style)
+  vaf / vif         Around/inside function (treesitter)
+  vac / vic         Around/inside class (treesitter)
+
+==============================================================================
+LSP (Language Server Protocol)                         *cheatsheet-lsp*
+
+Navigation ~
+  gd                Go to definition
+  gr                Go to references
+  gi                Go to implementation
+  gy                Go to type definition
+  <leader>D         Hover documentation
+
+Diagnostics ~
+  [g                Previous diagnostic
+  ]g                Next diagnostic
+  <leader>e         Show line diagnostics (floating)
+  <leader>xx        Toggle Trouble diagnostics panel
+  <leader>xd        Buffer diagnostics only
+  <leader>xr        LSP references in Trouble
+
+Refactoring ~
+  <leader>rn        Rename symbol
+  <leader>ca        Code action
+
+Completion (nvim-cmp) ~
+  <Tab>             Next completion item / expand snippet
+  <S-Tab>           Previous completion item / jump back in snippet
+  <CR>              Confirm completion
+  <C-Space>         Trigger completion manually
+  <C-e>             Dismiss completion menu
+  <C-d> / <C-u>    Scroll documentation down/up
+
+Installed Servers ~
+  lua_ls            Lua (Neovim development)
+  solargraph        Ruby
+  ts_ls             TypeScript / JavaScript
+  pyright           Python
+
+==============================================================================
+GIT                                                    *cheatsheet-git*
+
+Gitsigns (hunks) ~
+  ]h                Next changed hunk
+  [h                Previous changed hunk
+  <leader>hs        Stage hunk
+  <leader>hr        Reset hunk
+  <leader>hp        Preview hunk (floating diff)
+  <leader>hb        Blame current line
+
+LazyGit ~
+  <leader>gg        Open LazyGit (full TUI)
+  <leader>gl        LazyGit log
+
+Diffview ~
+  <leader>gd        Open diff view (all changes)
+  <leader>gh        File history for current file
+  <leader>gH        Full branch history
+  <leader>gc        Close diff view
+
+Fugitive ~
+  :Git              Run any git command
+  :Git blame        Inline blame
+  :Git log          Commit log
+  :Gdiffsplit       Side-by-side diff
+
+==============================================================================
+DIAGNOSTICS & TODOS                              *cheatsheet-diagnostics*
+
+Trouble ~
+  <leader>xx        All diagnostics
+  <leader>xd        Buffer diagnostics
+  <leader>xl        Location list
+  <leader>xq        Quickfix list
+  <leader>xr        LSP references
+
+TODO Comments ~
+  ]t                Jump to next TODO/FIXME/HACK
+  [t                Jump to previous TODO
+  <leader>xt        List all TODOs in Trouble
+  <leader>ft        Search TODOs with Telescope
+
+  Recognized keywords: TODO, FIXME, HACK, WARN, PERF, NOTE, TEST
+
+==============================================================================
+UI & MISC                                              *cheatsheet-ui*
+
+Undo Tree ~
+  <leader>G         Toggle undo tree panel
+
+Diff ~
+  <leader>df        Start diff mode for current buffer
+
+Noice (messages) ~
+  Messages, cmdline, and search use floating windows.
+  LSP hover/signature rendered in bordered popups.
+
+Which-Key ~
+  Press <leader> and wait ~300ms to see all available bindings.
+  Each group is labeled: Buffer, Code, Diff, Find, Git, etc.
+
+==============================================================================
+PLUGIN MANAGEMENT                                  *cheatsheet-plugins*
+
+  :Lazy             Open lazy.nvim dashboard
+  :Lazy update      Update all plugins
+  :Lazy sync        Install missing + update + clean
+  :Mason            Open Mason LSP/formatter installer
+  :TSUpdate         Update treesitter parsers
+  :checkhealth      Run health checks for all plugins
+
+==============================================================================
+LEADER KEY GROUPS                                  *cheatsheet-leader*
+
+  ,?                Search all keymaps
+  ,/                Open this cheatsheet
+
+  ,b...             Buffer management
+  ,c...             Code (format)
+  ,d...             Diff
+  ,f...             Find (Telescope)
+  ,g...             Git (lazygit, diffview)
+  ,h...             Hunk (gitsigns)
+  ,q...             Session (persistence)
+  ,r...             Refactor (rename)
+  ,s...             Surround shortcuts
+  ,x...             Diagnostics (Trouble, TODOs)
+
+  ,w                Save
+  ,q                Quit
+  ,t                File tree
+  ,e                Line diagnostic
+  ,n                Toggle relative numbers
+  ,S                Strip whitespace
+  ,G                Undo tree
+  ,D                Hover docs
+  ,a / ,A           Swap argument next/prev
+  ,<space>          Clear search highlight
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:
