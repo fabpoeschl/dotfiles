@@ -3,4 +3,7 @@ vim/bundle
 vim/netrwhist
 zsh/cache
 zsh/zgen
-
+doc/concepts
+doc/specs
+doc/plans
+doc/reviews
