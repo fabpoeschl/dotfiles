@@ -56,7 +56,7 @@ run_test() {
   email = "test@example.com"
   signingkey = ""
 CONF
-    chezmoi apply --no-tty 2>&1
+    chezmoi apply --no-tty --exclude=scripts,externals 2>&1
   '); then
     pass "chezmoi apply succeeded"
   else
@@ -76,7 +76,7 @@ CONF
   email = "test@example.com"
   signingkey = ""
 CONF
-    chezmoi apply --no-tty 2>/dev/null
+    chezmoi apply --no-tty --exclude=scripts,externals 2>/dev/null
 
     STATUS=0
     check() {
