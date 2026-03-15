@@ -16,7 +16,7 @@ RUN echo 'echo "old bashrc"' > /root/.bashrc && \
     mkdir -p /root/.zsh/zgen && echo "fake zgen" > /root/.zsh/zgen/zgen.zsh
 
 # Install chezmoi
-RUN sh -c "$(curl -fsLS get.chezmoi.io)"
+RUN BINDIR=/usr/local/bin sh -c "$(curl -fsLS get.chezmoi.io)" && chezmoi --version
 
 # Copy dotfiles as chezmoi source
 COPY . /root/.local/share/chezmoi

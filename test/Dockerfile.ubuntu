@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install chezmoi
-RUN sh -c "$(curl -fsLS get.chezmoi.io)"
+RUN BINDIR=/usr/local/bin sh -c "$(curl -fsLS get.chezmoi.io)" && chezmoi --version
 
 # Copy dotfiles as chezmoi source
 COPY . /root/.local/share/chezmoi
