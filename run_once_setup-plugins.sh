@@ -4,6 +4,6 @@ set -euo pipefail
 
 if command -v vim &>/dev/null; then
   echo "=== Installing vim plugins ==="
-  vim +PlugInstall +PlugClean! +qall
+  vim --not-a-term +PlugInstall +PlugClean! +qall
   echo "[ok] vim plugins installed"
 fi

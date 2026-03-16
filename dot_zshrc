@@ -29,15 +29,15 @@ fi
 
 ZSH_BASE_DIR="${HOME}/.zsh"
 if [[ -d "$ZSH_BASE_DIR" ]]; then
-  for file in "$ZSH_BASE_DIR"/*.zsh; do
+  for file in "$ZSH_BASE_DIR"/*.zsh(N); do
     source "$file"
   done
   unset file
 fi
 
 ZSH_FUNCTIONS_DIR="${ZSH_BASE_DIR}/functions"
-if [[ -d "$ZSH_BASE_DIR" ]]; then
-  for file in "$ZSH_FUNCTIONS_DIR"/*.zsh; do
+if [[ -d "$ZSH_FUNCTIONS_DIR" ]]; then
+  for file in "$ZSH_FUNCTIONS_DIR"/*.zsh(N); do
     source "$file"
   done
   unset file

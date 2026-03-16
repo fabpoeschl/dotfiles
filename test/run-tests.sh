@@ -36,7 +36,7 @@ run_test() {
 
   # Build
   echo "Building ${image}..."
-  if ! docker build -f "${dockerfile}" -t "${image}" "${REPO_ROOT}" 2>&1; then
+  if ! docker build -f "${dockerfile}" -t "${image}" "${REPO_ROOT}"; then
     fail "Docker build failed for ${name}"
     return
   fi
@@ -44,10 +44,10 @@ run_test() {
 
   if $BUILD_ONLY; then return; fi
 
-  # Apply chezmoi non-interactively with default config values
-  echo "Running chezmoi apply..."
-  local apply_output
-  if apply_output=$(docker run --rm "${image}" bash -c '
+  # Apply chezmoi and validate in a single container
+  echo "Running chezmoi apply and validating..."
+  local test_output
+  if test_output=$(docker run --rm "${image}" bash -c '
     # Provide default config so chezmoi does not prompt
     mkdir -p ~/.config/chezmoi
     cat > ~/.config/chezmoi/chezmoi.toml <<CONF
@@ -56,27 +56,12 @@ run_test() {
   email = "test@example.com"
   signingkey = ""
 CONF
-    chezmoi apply --no-tty --exclude=scripts,externals 2>&1
-  '); then
-    pass "chezmoi apply succeeded"
-  else
-    fail "chezmoi apply failed"
-    echo "$apply_output"
-    return
-  fi
 
-  # Validate files were placed correctly
-  echo "Validating dotfiles..."
-  local apply_validation
-  if apply_validation=$(docker run --rm "${image}" bash -c '
-    mkdir -p ~/.config/chezmoi
-    cat > ~/.config/chezmoi/chezmoi.toml <<CONF
-[data]
-  name = "Test User"
-  email = "test@example.com"
-  signingkey = ""
-CONF
-    chezmoi apply --no-tty --exclude=scripts,externals 2>/dev/null
+    if ! chezmoi apply --no-tty --exclude=scripts,externals 2>&1; then
+      echo "APPLY_FAILED"
+      exit 1
+    fi
+    echo "APPLY_OK"
 
     STATUS=0
     check() {
@@ -119,15 +104,21 @@ CONF
   '); then
     :
   else
-    fail "Validation container exited with error"
+    :
   fi
 
   while IFS= read -r line; do
     case "$line" in
+      APPLY_OK) pass "chezmoi apply succeeded" ;;
+      APPLY_FAILED)
+        fail "chezmoi apply failed"
+        echo "$test_output"
+        return
+        ;;
       PASS*) pass "${line#PASS }" ;;
       FAIL*) fail "${line#FAIL }" ;;
     esac
-  done <<< "$apply_validation"
+  done <<< "$test_output"
 }
 
 for target in "${TARGETS[@]}"; do

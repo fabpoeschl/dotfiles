@@ -40,7 +40,13 @@ elif [[ "$OS" == "Linux" ]]; then
 
   # mise (not in apt)
   if ! command -v mise &>/dev/null; then
-    curl -fsSL https://mise.run | sh && info "mise installed" || error "mise failed to install"
+    tmpfile="$(mktemp)"
+    if curl -fsSL https://mise.run -o "$tmpfile" && [ -s "$tmpfile" ]; then
+      sh "$tmpfile" && info "mise installed" || error "mise install script failed"
+    else
+      error "mise download failed"
+    fi
+    rm -f "$tmpfile"
   else
     warn "mise already installed"
   fi
