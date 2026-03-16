@@ -30,4 +30,39 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 
+-- neotest setup
+local neotest = require("neotest")
+neotest.setup({
+  adapters = {
+    require("neotest-rspec")({
+      rspec_cmd = function()
+        return vim.tbl_flatten({ "bundle", "exec", "rspec" })
+      end,
+    }),
+    require("neotest-python")({
+      dap = { justMyCode = false },
+      runner = "pytest",
+    }),
+    require("neotest-jest")({
+      jestCommand = "npx jest",
+      cwd = function()
+        return vim.fn.getcwd()
+      end,
+    }),
+  },
+  status = { virtual_text = true },
+  output = { open_on_run = true },
+})
+
+-- keybindings (<leader>t namespace)
+vim.keymap.set("n", "<leader>tn", function() neotest.run.run() end,                       { desc = "Test nearest" })
+vim.keymap.set("n", "<leader>tf", function() neotest.run.run(vim.fn.expand("%")) end,     { desc = "Test file" })
+vim.keymap.set("n", "<leader>ts", function() neotest.summary.toggle() end,                { desc = "Test summary" })
+vim.keymap.set("n", "<leader>to", function() neotest.output.open({ enter = true }) end,   { desc = "Test output" })
+vim.keymap.set("n", "<leader>tp", function() neotest.output_panel.toggle() end,           { desc = "Test output panel" })
+vim.keymap.set("n", "<leader>tl", function() neotest.run.run_last() end,                  { desc = "Re-run last test" })
+vim.keymap.set("n", "<leader>tx", function() neotest.run.stop() end,                      { desc = "Stop test" })
+vim.keymap.set("n", "[t",         function() neotest.jump.prev({ status = "failed" }) end,{ desc = "Prev failed test" })
+vim.keymap.set("n", "]t",         function() neotest.jump.next({ status = "failed" }) end,{ desc = "Next failed test" })
+
 EOF

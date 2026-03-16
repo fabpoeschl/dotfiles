@@ -61,6 +61,15 @@ Plug 'vim-airline/vim-airline-themes'
 
 if has('nvim')
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+  " neotest + adapters
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-neotest/nvim-nio'
+  Plug 'antoinemadec/FixCursorHold.nvim'
+  Plug 'nvim-neotest/neotest'
+  Plug 'olimorris/neotest-rspec'
+  Plug 'nvim-neotest/neotest-python'
+  Plug 'nvim-neotest/neotest-jest'
 endif
 
 call plug#end()
