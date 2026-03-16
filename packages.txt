@@ -1,0 +1,27 @@
+# Linux (apt) packages - one per line
+# Lines starting with # are comments, blank lines are ignored
+# Format: package_name  (installed via apt-get)
+
+# Core
+zsh
+zsh-syntax-highlighting
+tmux
+vim
+curl
+gcc
+
+# Modern CLI tools
+ripgrep
+fd-find
+bat
+fzf
+# eza, git-delta, zoxide require PPAs or manual install on Ubuntu
+# Install via: cargo install eza, or https://github.com/eza-community/eza
+# Install via: https://github.com/dandavison/delta/releases
+# Install via: https://github.com/ajeetdsouza/zoxide/releases
+
+# Networking
+openvpn
+
+# Browsers
+firefox

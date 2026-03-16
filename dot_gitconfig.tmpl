@@ -1,0 +1,35 @@
+[init]
+	templatedir = ~/.git_template
+[user]
+	name = {{ .name }}
+	email = {{ .email }}
+{{- if .signingkey }}
+	signingkey = {{ .signingkey }}
+{{- end }}
+[alias]
+	co = checkout
+	ci = commit
+	ctags = !.git/hooks/ctags
+	st = status
+	br = branch
+	l  = log --graph --abbrev-commit --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+	diffw = diff --word-diff=color
+[color]
+	ui = auto
+[core]
+	excludesfile = ~/.gitignore
+	autocrlf = input
+	editor = vim
+	pager = delta --dark 2>/dev/null || less -+$LESS -RSX
+[push]
+	default = simple
+[commit]
+	verbose = true
+[submodule]
+	fetchJobs = 4
+[rebase]
+	autostash = true
+[status]
+	showUntrackedFiles = all
+[merge]
+	conflictstyle = diff3

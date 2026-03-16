@@ -1,0 +1,26 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV HOME=/root
+
+# Minimal base
+RUN apt-get update && apt-get install -y \
+    git sudo curl wget ca-certificates software-properties-common zsh vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Simulate an existing system with old dotfiles
+RUN echo 'echo "old bashrc"' > /root/.bashrc && \
+    echo 'echo "old zshrc"' > /root/.zshrc && \
+    mkdir -p /root/.vim && echo "old vim config" > /root/.vim/README && \
+    echo '[user]\n\tname = Old Name' > /root/.gitconfig && \
+    mkdir -p /root/.zsh/zgen && echo "fake zgen" > /root/.zsh/zgen/zgen.zsh
+
+# Install chezmoi
+RUN BINDIR=/usr/local/bin sh -c "$(curl -fsLS get.chezmoi.io)" && chezmoi --version
+
+# Copy dotfiles as chezmoi source
+COPY . /root/.local/share/chezmoi
+WORKDIR /root
+
+# To test: docker run -it <image> chezmoi diff
+CMD ["bash"]

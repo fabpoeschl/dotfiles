@@ -1,6 +1,10 @@
-bash/bash-sensible
-vim/bundle
-vim/netrwhist
-zsh/cache
-zsh/zgen
+# External repos managed by chezmoi
+dot_bash/bash-sensible
+dot_zsh/zgenom
+dot_zsh/zgen
+dot_zsh/cache
 
+# Vim runtime files
+dot_vim/bundle
+dot_vim/.netrwhist
+dot_vim/plugged

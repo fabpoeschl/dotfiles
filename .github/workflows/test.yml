@@ -1,0 +1,19 @@
+name: Test dotfiles
+
+on:
+  push:
+    branches: [master, "claude/**"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ubuntu, ubuntu-existing]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test chezmoi apply (${{ matrix.target }})
+        run: ./test/run-tests.sh ${{ matrix.target }}

@@ -30,10 +30,6 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# NVM
-#export NVM_DIR="~/.nvm"
-#[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
   PATH="$HOME/bin:$PATH"
@@ -54,15 +50,5 @@ alias  gs='git status'
 alias  gl='git l'
 alias  gp='git pull'
 alias gaa='git add -A'
-#alias    m='mvn'
-#alias   mc='mvn clean'
-#alias   mt='mvn test'
-#alias  mct='mvn clean test'
-#alias  mcp='mvn clean package'
-#alias mcpt='mvn clean package -Dmaven.test.skip=true'
-#alias  mpt='mvn package -Dmaven.test.skip=true'
-#alias  mci='mvn clean install'
-#alias mcit='mvn clean install -Dmaven.test.skip=true'
-#alias  mdt="mvn dependency:tree"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
