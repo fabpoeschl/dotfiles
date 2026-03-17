@@ -5,3 +5,19 @@ LICENSE
 Brewfile
 packages.txt
 test/
+
+# Legacy pre-chezmoi files (untracked)
+bootstrap.sh
+bootstrap/
+config/
+etc/
+install.py
+iterm2/
+nvim/
+vim/
+zsh/
+
+# Runtime/editor artifacts
+.nvimlog
+Session.vim
+.claude/

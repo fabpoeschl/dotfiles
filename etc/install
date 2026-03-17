@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+# Usage:
+#   Fresh machine:  sh -c "$(curl -fsSL https://raw.githubusercontent.com/fabpoeschl/dotfiles/master/etc/install)"
+#   Existing clone: ./etc/install
+
+GITHUB_USER="fabpoeschl"
+
+# -------------------------------------------------------------------
+# Install chezmoi if not present
+# -------------------------------------------------------------------
+if ! command -v chezmoi &>/dev/null; then
+  echo "Installing chezmoi..."
+  if command -v brew &>/dev/null; then
+    brew install chezmoi
+  else
+    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+    export PATH="$HOME/.local/bin:$PATH"
+  fi
+fi
+
+# -------------------------------------------------------------------
+# Init + apply
+#   chezmoi init clones the repo (if needed) and renders the config
+#   template, prompting for name/email/signingkey interactively.
+# -------------------------------------------------------------------
+echo "Initializing and applying dotfiles..."
+chezmoi init --apply "$GITHUB_USER"
+
+echo "All done!"
