@@ -1,21 +1,27 @@
-" General config {{{
+" Generaj config {{{
 set nocompatible
+
+set maxmempattern=5000000
 
 " default encoding
 set encoding=utf-8
 
 " set filetype stuff to on
 filetype off
-
-" }}}
-
-" Plugins {{{
-source ~/.vim/plugins.vim
-" }}}
-"
-" Colors {{{
+filetype indent on
+filetype plugin on
 syntax enable
-" }}}
+
+let mapleader=","
+
+source ~/.vim/plugins.vim
+
+" Edit vimr configuration file
+nnoremap <Leader>ve :e ~/.vimrc<CR>
+" " Reload vimr configuration file
+nnoremap <Leader>vr :source ~/.vimrc<CR>
+
+" ---------------------------------------------------------------- }}}
 
 " Spaces and Tabs {{{
 set tabstop=2
@@ -25,9 +31,7 @@ set expandtab
 set autoindent
 set smartindent
 
-filetype indent on
-filetype plugin on
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " UI Layout {{{
 set number
@@ -37,6 +41,7 @@ set nocursorline
 set wildmenu   " visual autocomplete for command menu
 set lazyredraw " redraw only when needed
 set showmatch  " highlight matching [{()}]
+set signcolumn=yes " always show signcolumn for gitgutter/ALE
 "}}}
 
 " Searching {{{
@@ -45,7 +50,7 @@ set smartcase
 set incsearch " search as characters are entered
 set hlsearch  " highlight matches
 set wrapscan
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " Folding {{{
 set foldenable
@@ -54,7 +59,7 @@ set foldnestmax=10
 set foldmethod=indent
 " space open/closes folds
 nnoremap <space> za
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " Tab shortcuts {{{
 nnoremap <C-t> :tabnew<CR>
@@ -66,20 +71,19 @@ nnoremap tt  :tabedit<Space>
 nnoremap tn  :tabnext<Space>
 nnoremap tm  :tabm<Space>
 nnoremap td  :tabclose<CR>
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " Line shortcuts {{{
 " turn off search highlight
-nnoremap <leader><space> :nohlsearch<CR>
+nnoremap <leader>h :nohlsearch<CR>
 " move vertically by visual line
 nnoremap j gj
 nnoremap k gk
 " highlight last inserted text
 nnoremap gV `[v`]
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " Leader Shortcuts {{{
-let mapleader=","
 " jk is escape
 inoremap jk <esc>
 " move to beginning/end of line
@@ -110,7 +114,6 @@ nmap  <leader>s' ysiw'
 nmap  <leader>s` ysiw`
 nmap  <leader>s* ysiw*l
 nmap  <leader>s_ ysiw_l
-nmap  <leader>s~ ysiw~l
 nmap  <leader>s$ ysiw$
 nmap  <leader>s( ysiw(
 nmap  <leader>s) ysiw)
@@ -121,17 +124,12 @@ nmap  <leader>s} ysiw}
 
 " <leader>df : diffthis
 nnoremap <leader>df :diffthis<CR>
-" }}}
-
-" System Clipboard {{{
-set clipboard=unnamed
-nnoremap <C-c> "+y
-vnoremap <C-c> "+y
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " FZF {{{
-nnoremap <silent> <C-p> :FZF<CR>
-" }}}
+nnoremap <silent> <C-p> :GFiles<CR>
+nnoremap <silent> <C-f> :Files<CR>
+" ---------------------------------------------------------------- }}}
 
 " {{{ Airline
 autocmd User AirlineAfterInit call AirlineSectionInit()
@@ -170,8 +168,6 @@ let g:airline#parts#ffenc#skip_expected_string = 'utf-8[unix]'
 " section z: current position, but more concisely
 let g:airline_section_z = 'L%3l:%v'
 
-" }}}
-
 " enable tabline feature
 let g:airline#extensions#tabline#enabled = 1
 
@@ -184,7 +180,7 @@ let g:airline#extensions#tabline#show_buffers = 1
 
 " suppress mixed-indent warning for javadoc-like comments (/** */)
 let g:airline#extensions#whitespace#mixed_indent_algo = 1
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " Use ripgrep for :grep if available, fall back to grep
 if executable('rg')
@@ -199,18 +195,18 @@ nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 " no fucking swap and backup files
 set noswapfile
 set nobackup
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " SnipMate {{{
 let g:snipMate = { 'snippet_version' : 1 }
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " gundo key mappings and options {{{
 let g:gundo_right = 1   " show at right
 nnoremap <leader>G :GundoToggle<CR>
-" }}}
+" ---------------------------------------------------------------- }}}
 
-" dictionary
+" dictionary {{{
 if filereadable('/usr/share/dict/words')
   set dictionary+=/usr/share/dict/words
 endif
@@ -220,13 +216,14 @@ set history=10000
 set undolevels=1000
 
 " miscellanious
-set visualbell
+set novisualbell
 set lazyredraw              " no redrawing during macro execution
 
 " Make gitgutter signs, etc. be more responsive (default is 4000ms)
 set updatetime=200
 
 set matchpairs+=<:>
+" ---------------------------------------------------------------- }}}
 
 " CTags {{{
 " Set f5 to generate tags for non-latex files
@@ -239,7 +236,7 @@ if !exists("b:latex")
 endif
 
 set tags=./.tags;$HOME
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " Custom Functions {{{
 
@@ -264,6 +261,6 @@ function! StripTrailingWhitespaces()
     let @/=_s
     call cursor(l, c)
 endfunction
-" }}}
+" ---------------------------------------------------------------- }}}
 
 " vim:foldmethod=marker:foldlevel=0

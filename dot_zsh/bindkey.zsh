@@ -11,7 +11,7 @@
 #   alt  + .     : cycle through previous args
 
 # current selected match accepted in menu selection
-bindkey -M menuselect '^M' .accept-line
+#bindkey -M menuselect '^M' .accept-line
 
 # go backward in menu with shift-tab
 bindkey '^[[Z' reverse-menu-complete
@@ -38,3 +38,6 @@ bindkey -s '^ ' 'git status --short^M'
 # Find the key with: showkey -a
 # '^J': Ctrl+Enter
 bindkey '^J' autosuggest-execute
+
+# Copy cursor with delimiter
+bindkey '^q' copy-cursor

@@ -32,17 +32,40 @@ Plug 'plasticboy/vim-markdown'
 " tools 
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }  " FZF plugin, makes Ctrl-P unnecessary
 Plug 'junegunn/fzf.vim'
+Plug 'vim-test/vim-test'
+Plug 'mfussenegger/nvim-dap'
+Plug 'suketa/nvim-dap-ruby'
 
 let g:_nerdtree_lazy_events = ['NERDTree', 'NERDTreeToggle', 'NERDTreeTabsToggle', '<Plug>NERDTreeTabsToggle']
 Plug 'scrooloose/nerdtree', { 'on': g:_nerdtree_lazy_events }
 Plug 'jistr/vim-nerdtree-tabs', { 'on': g:_nerdtree_lazy_events }
 Plug 'szw/vim-maximizer'    " zoom and unzoom!
 Plug 'sjl/gundo.vim'
+
 if !has('nvim')
   Plug 'tpope/vim-dadbod'
   Plug 'kristijanhusak/vim-dadbod-ui'
 else
   Plug 'dinhhuy258/vim-database', {'branch': 'master', 'do': ':UpdateRemotePlugins'}
+
+  " avante dependencies
+  Plug 'stevearc/dressing.nvim'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'MunifTanjim/nui.nvim'
+  Plug 'MeanderingProgrammer/render-markdown.nvim'
+
+  " Optional avante deps
+  Plug 'hrsh7th/nvim-cmp'
+  Plug 'nvim-tree/nvim-web-devicons' "or Plug 'echasnovski/mini.icons'
+  Plug 'HakonHarnes/img-clip.nvim'
+  Plug 'zbirenbaum/copilot.lua'
+
+  " Yay, pass source=true if you want to build from source
+  Plug 'yetone/avante.nvim', { 'branch': 'main', 'do': 'make' }
+  autocmd! User avante.nvim lua << EOF
+  require('avante_lib').load()
+  require('avante').setup()
+  EOF
 endif
 
 " code completion
