@@ -5,3 +5,11 @@ LICENSE
 Brewfile
 packages.txt
 test/
+
+# Platform-specific: only deploy LaunchAgents on macOS, systemd on Linux
+{{- if ne .chezmoi.os "darwin" }}
+Library/
+{{- end }}
+{{- if ne .chezmoi.os "linux" }}
+.config/systemd/
+{{- end }}

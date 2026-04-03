@@ -118,13 +118,40 @@ if [[ "$OS" == "Linux" ]]; then
   fi
 fi
 
+# --- Load LaunchAgents (macOS only) ---
+if [[ "$OS" == "Darwin" ]]; then
+  AGENTS_DIR="$HOME/Library/LaunchAgents"
+
+  for plist in com.ollama.server com.tabbyml.server; do
+    if [ -f "$AGENTS_DIR/$plist.plist" ]; then
+      # Unload first in case of a previous version
+      launchctl bootout "gui/$(id -u)" "$AGENTS_DIR/$plist.plist" 2>/dev/null || true
+      launchctl bootstrap "gui/$(id -u)" "$AGENTS_DIR/$plist.plist" \
+        && info "$plist loaded" \
+        || error "$plist failed to load"
+    else
+      error "$AGENTS_DIR/$plist.plist not found"
+    fi
+  done
+fi
+
 echo ""
 echo "=== Setup complete ==="
-echo "Ollama and Tabby are running as systemd user services."
-echo "Open neovim and start typing!"
+if [[ "$OS" == "Linux" ]]; then
+  echo "Ollama and Tabby are running as systemd user services."
+  echo ""
+  echo "Useful commands:"
+  echo "  systemctl --user status ollama"
+  echo "  systemctl --user status tabby"
+  echo "  journalctl --user -u ollama -f"
+  echo "  journalctl --user -u tabby -f"
+elif [[ "$OS" == "Darwin" ]]; then
+  echo "Ollama and Tabby are running as LaunchAgents."
+  echo ""
+  echo "Useful commands:"
+  echo "  launchctl list | grep -E 'ollama|tabby'"
+  echo "  tail -f /tmp/ollama.err.log"
+  echo "  tail -f /tmp/tabby.err.log"
+fi
 echo ""
-echo "Useful commands:"
-echo "  systemctl --user status ollama"
-echo "  systemctl --user status tabby"
-echo "  journalctl --user -u ollama -f"
-echo "  journalctl --user -u tabby -f"
+echo "Open neovim and start typing!"
