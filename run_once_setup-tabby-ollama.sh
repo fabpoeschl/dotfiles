@@ -84,9 +84,47 @@ if command -v vim &>/dev/null; then
     || warn "vim plugin install had warnings (may need manual :PlugInstall)"
 fi
 
+# --- Enable systemd user services (Linux only) ---
+if [[ "$OS" == "Linux" ]]; then
+  if command -v systemctl &>/dev/null; then
+    systemctl --user daemon-reload
+
+    if ! systemctl --user is-enabled ollama.service &>/dev/null; then
+      systemctl --user enable --now ollama.service \
+        && info "ollama.service enabled and started" \
+        || error "failed to enable ollama.service"
+    else
+      warn "ollama.service already enabled"
+      systemctl --user restart ollama.service
+    fi
+
+    if ! systemctl --user is-enabled tabby.service &>/dev/null; then
+      systemctl --user enable --now tabby.service \
+        && info "tabby.service enabled and started" \
+        || error "failed to enable tabby.service"
+    else
+      warn "tabby.service already enabled"
+      systemctl --user restart tabby.service
+    fi
+
+    # Allow user services to run without an active login session
+    if command -v loginctl &>/dev/null; then
+      loginctl enable-linger "$(whoami)" 2>/dev/null \
+        && info "loginctl linger enabled" \
+        || warn "loginctl linger failed (services will stop on logout)"
+    fi
+  else
+    warn "systemctl not found; skipping service setup"
+  fi
+fi
+
 echo ""
 echo "=== Setup complete ==="
-echo "To start the stack:"
-echo "  1. ollama serve          (if not already running)"
-echo "  2. tabby serve           (starts on http://localhost:8080)"
-echo "  3. Open neovim and start typing!"
+echo "Ollama and Tabby are running as systemd user services."
+echo "Open neovim and start typing!"
+echo ""
+echo "Useful commands:"
+echo "  systemctl --user status ollama"
+echo "  systemctl --user status tabby"
+echo "  journalctl --user -u ollama -f"
+echo "  journalctl --user -u tabby -f"

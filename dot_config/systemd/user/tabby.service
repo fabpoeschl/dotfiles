@@ -1,0 +1,13 @@
+[Unit]
+Description=Tabby AI Code Completion Server
+After=network-online.target ollama.service
+Requires=ollama.service
+
+[Service]
+ExecStart=%h/.local/bin/tabby serve --port 8080
+Environment=TABBY_CONFIG_DIR=%h/.config/tabby
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
