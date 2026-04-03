@@ -205,6 +205,16 @@ set nobackup
 let g:snipMate = { 'snippet_version' : 1 }
 " }}}
 
+" Tabby (AI completion) {{{
+let g:tabby_server_url = 'http://localhost:8080'
+" Accept inline suggestion with <Tab> (only fires when suggestion visible)
+let g:tabby_accept_binding = '<Tab>'
+" Dismiss suggestion
+let g:tabby_dismiss_binding = '<C-]>'
+" Trigger/toggle manual completion
+let g:tabby_trigger_mode = 'auto'
+" }}}
+
 " gundo key mappings and options {{{
 let g:gundo_right = 1   " show at right
 nnoremap <leader>G :GundoToggle<CR>
