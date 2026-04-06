@@ -82,7 +82,7 @@ CONF
     check ~/.vim/autoload/plug.vim
     check ~/.zsh/aliases.zsh
     check ~/.zsh/functions/extract.zsh
-    check ~/.config/nvim/init.vim
+    check ~/.config/nvim/init.lua
     check ~/.git_template/ctags
 
     # Validate gitconfig was templated correctly
