@@ -5,7 +5,7 @@ Requires=ollama.service
 
 [Service]
 ExecStart=%h/.local/bin/tabby serve --port 8080
-Environment=TABBY_CONFIG_DIR=%h/.config/tabby
+Environment=TABBY_CONFIG_DIR=%h/.tabby
 Restart=on-failure
 RestartSec=5
 

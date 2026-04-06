@@ -48,9 +48,6 @@ endif
 " code completion
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'w0rp/ale'
-
-" AI code completion (Tabby + Ollama)
-Plug 'TabbyML/vim-tabby'
 Plug 'tpope/vim-surround'
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'tomtom/tlib_vim'
@@ -73,6 +70,7 @@ if has('nvim')
   Plug 'olimorris/neotest-rspec'
   Plug 'nvim-neotest/neotest-python'
   Plug 'nvim-neotest/neotest-jest'
+
 endif
 
 call plug#end()

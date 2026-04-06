@@ -18,8 +18,11 @@ echo "=== Setting up Tabby + Ollama ==="
 
 # --- Ollama ---
 if ! command -v ollama &>/dev/null; then
-  if [[ "$OS" == "Darwin" ]]; then
-    warn "ollama should be installed via Brewfile; run 'brew bundle' first"
+  if [[ "$OS" == "Darwin" ]] && command -v brew &>/dev/null; then
+    echo "Installing Ollama via Homebrew..."
+    brew install ollama \
+      && info "ollama installed" \
+      || error "ollama install failed"
   else
     echo "Installing Ollama..."
     curl -fsSL https://ollama.com/install.sh | sh \
@@ -32,8 +35,11 @@ fi
 
 # --- Tabby ---
 if ! command -v tabby &>/dev/null; then
-  if [[ "$OS" == "Darwin" ]]; then
-    warn "tabby should be installed via Brewfile; run 'brew bundle' first"
+  if [[ "$OS" == "Darwin" ]] && command -v brew &>/dev/null; then
+    echo "Installing Tabby via Homebrew..."
+    brew install tabbyml/tabby/tabby \
+      && info "tabby installed" \
+      || error "tabby install failed"
   else
     echo "Installing Tabby..."
     tmpfile="$(mktemp)"
@@ -74,14 +80,6 @@ if command -v ollama &>/dev/null; then
       kill "$OLLAMA_PID" 2>/dev/null || true
     fi
   fi
-fi
-
-# --- Install vim-tabby plugin ---
-if command -v vim &>/dev/null; then
-  echo "Installing vim-tabby plugin..."
-  vim --not-a-term +PlugInstall +qall 2>/dev/null \
-    && info "vim-tabby plugin installed" \
-    || warn "vim plugin install had warnings (may need manual :PlugInstall)"
 fi
 
 # --- Enable systemd user services (Linux only) ---

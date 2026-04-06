@@ -20,7 +20,7 @@ brew "lazygit"
 
 # AI code completion
 brew "ollama"
-brew "tabby"
+brew "tabbyml/tabby/tabby"
 
 # Containers
 cask "docker"
