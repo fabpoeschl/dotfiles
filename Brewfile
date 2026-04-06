@@ -18,6 +18,10 @@ brew "fzf"
 brew "zoxide"
 brew "lazygit"
 
+# AI code completion
+brew "ollama"
+brew "tabbyml/tabby/tabby"
+
 # Containers
 cask "docker"
 brew "docker-compose"

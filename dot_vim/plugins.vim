@@ -70,6 +70,7 @@ if has('nvim')
   Plug 'olimorris/neotest-rspec'
   Plug 'nvim-neotest/neotest-python'
   Plug 'nvim-neotest/neotest-jest'
+
 endif
 
 call plug#end()
