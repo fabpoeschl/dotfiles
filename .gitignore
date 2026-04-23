@@ -4,6 +4,9 @@ dot_zsh/zgenom
 dot_zsh/zgen
 dot_zsh/cache
 
+# Brew bundle lock file
+Brewfile.lock.json
+
 # Vim runtime files
 dot_vim/bundle
 dot_vim/.netrwhist
