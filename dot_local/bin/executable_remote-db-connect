@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Port-forward a database pod from a Kubernetes cluster.
+#
+# Usage:
+#   remote-db-connect -c <context> -n <namespace> -d <database-name> [-p <port>]
+#
+# Finds the first running pod whose name contains <database-name> in the given
+# namespace/context and forwards its database port to localhost.
+# Supports PostgreSQL (5432), MySQL (3306), Redis (6379), and MongoDB (27017).
+
+set -euo pipefail
+
+if ! command -v kubectl &>/dev/null; then
+  echo "Error: kubectl is not installed or not in PATH"
+  exit 1
+fi
+
+usage() {
+  echo "Usage: remote-db-connect -c <context> -n <namespace> -d <database> [-p <port>]"
+  echo ""
+  echo "Options:"
+  echo "  -c, --context     Kubernetes context (e.g. staging, production)"
+  echo "  -n, --namespace   Kubernetes namespace"
+  echo "  -d, --database    Substring to match against pod names (e.g. postgres, redis)"
+  echo "  -p, --port        Remote port (auto-detected from database name if omitted)"
+  echo ""
+  echo "Examples:"
+  echo "  remote-db-connect -c staging -n my-ns -d my-postgres"
+  echo "  remote-db-connect -c staging -n my-ns -d my-postgres -p 5433"
+  echo "  remote-db-connect --context production --namespace payments --database redis"
+  exit 1
+}
+
+CONTEXT=""
+NAMESPACE=""
+DB_NAME=""
+PORT_OVERRIDE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c|--context)   [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; CONTEXT="$2";       shift 2 ;;
+    -n|--namespace) [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; NAMESPACE="$2";     shift 2 ;;
+    -d|--database)  [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; DB_NAME="$2";       shift 2 ;;
+    -p|--port)      [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; PORT_OVERRIDE="$2"; shift 2 ;;
+    -h|--help)      usage ;;
+    *)              echo "Error: unknown option '$1'"; usage ;;
+  esac
+done
+
+[[ -z "$CONTEXT" || -z "$NAMESPACE" || -z "$DB_NAME" ]] && usage
+
+# Find a running pod
+POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
+  --field-selector=status.phase=Running \
+  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -F "$DB_NAME" | head -1)
+
+if [[ -z "$POD" ]]; then
+  echo "Error: no running pod matching '$DB_NAME' found in $NAMESPACE (context: $CONTEXT)"
+  exit 1
+fi
+
+echo "Found pod: $POD"
+
+# Detect database type and pick the right port
+detect_port() {
+  local name="${DB_NAME,,}"
+  case "$name" in
+    *postgres*|*pg*|*pgsql*)  echo 5432 ;;
+    *mysql*|*maria*)          echo 3306 ;;
+    *redis*)                  echo 6379 ;;
+    *mongo*)                  echo 27017 ;;
+    *)
+      # Fall back to inspecting the container ports
+      local port
+      port=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pod "$POD" \
+        -o jsonpath='{.spec.containers[0].ports[0].containerPort}' 2>/dev/null)
+      if [[ -n "$port" ]]; then
+        echo "$port"
+      else
+        echo ""
+      fi
+      ;;
+  esac
+}
+
+if [[ -n "$PORT_OVERRIDE" ]]; then
+  REMOTE_PORT="$PORT_OVERRIDE"
+else
+  REMOTE_PORT=$(detect_port)
+fi
+
+if [[ -z "$REMOTE_PORT" ]]; then
+  echo "Error: could not detect database port. Specify it with -p <port> or manually:"
+  echo "  kubectl --context $CONTEXT -n $NAMESPACE port-forward $POD <local>:<remote>"
+  exit 1
+fi
+
+LOCAL_PORT="$REMOTE_PORT"
+
+echo "Port-forwarding localhost:$LOCAL_PORT → $POD:$REMOTE_PORT"
+echo "Press Ctrl-C to stop"
+echo ""
+exec kubectl --context "$CONTEXT" -n "$NAMESPACE" port-forward "$POD" "$LOCAL_PORT:$REMOTE_PORT"

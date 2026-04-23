@@ -28,12 +28,6 @@ return {
     dependencies = "tpope/vim-rails",
   },
   {
-    "suketa/nvim-dap-ruby",
-    config = function()
-      require("dap-ruby").setup()
-    end,
-  },
-  {
     "slim-template/vim-slim",
     ft = "slim",
   },

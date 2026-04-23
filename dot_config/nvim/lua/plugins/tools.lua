@@ -7,21 +7,13 @@ return {
     },
   },
   {
-    "mfussenegger/nvim-dap",
-    dependencies = {
-      "suketa/nvim-dap-ruby",
-      "rcarriga/nvim-dap-ui",
-    },
-    keys = {
-      { "<leader>db", "<cmd>DapToggleBreakpoint<cr>", desc = "Toggle Breakpoint" },
-      { "<leader>dc", "<cmd>DapContinue<cr>", desc = "Continue" },
-    },
-  },
-  {
     "iamcco/markdown-preview.nvim",
     build = function()
       vim.fn["mkdp#util#install"]()
     end,
     ft = "markdown",
+    keys = {
+      { "<leader>mp", "<cmd>MarkdownPreviewToggle<CR>", desc = "Toggle markdown preview" },
+    },
   },
 }

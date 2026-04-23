@@ -34,6 +34,28 @@ return {
       require("config-treesitter").cfg()
     end,
   },
+  -- Which-key (keybinding discovery)
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    config = function()
+      local wk = require("which-key")
+      wk.setup({ preset = "modern" })
+      wk.add({
+        { "<leader>b", group = "Buffer" },
+        { "<leader>d", group = "Debug" },
+        { "<leader>f", group = "Find" },
+        { "<leader>g", group = "Git" },
+        { "<leader>k", group = "Kubernetes" },
+        { "<leader>m", group = "Markdown" },
+        { "<leader>s", group = "Surround" },
+        { "<leader>t", group = "Test" },
+        { "<leader>x", group = "Diagnostics" },
+        { "<leader>?", "<cmd>Telescope keymaps<CR>", desc = "Search all keymaps" },
+        { "<leader>/", function() vim.cmd("help cheatsheet") end, desc = "Cheatsheet" },
+      })
+    end,
+  },
   {
     "folke/tokyonight.nvim",
     lazy = false,

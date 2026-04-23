@@ -1,0 +1,300 @@
+*cheatsheet.txt*    Dotfiles Neovim Cheatsheet
+
+==============================================================================
+QUICK REFERENCE                                          *cheatsheet-quickref*
+
+  Leader key: , (comma)
+
+  ,?       Search all keymaps (Telescope)      Interactive keymap finder
+  ,/       Open this cheatsheet                You are here
+
+  Press , and wait for which-key to show all leader groups.
+
+==============================================================================
+NAVIGATION                                           *cheatsheet-navigation*
+
+Movement ~
+  j / k             Move by visual line (not physical line)
+  B                 Beginning of line (like ^)
+  E                 End of line (like $)
+  gV                Highlight last inserted text
+  <C-h/j/k/l>      Navigate between windows
+
+Search ~
+  <leader>h         Clear search highlighting
+  <leader>ff        Find files (Telescope)
+  <leader>fg        Live grep (Telescope)
+  <leader>fb        Open buffers (Telescope)
+  <leader>fh        Help tags (Telescope)
+  <leader>fk        Keymaps (Telescope)
+  <leader>fp        Git files (Telescope)
+
+==============================================================================
+FILE & BUFFER MANAGEMENT                              *cheatsheet-files*
+
+File Tree (nvim-tree) ~
+  <leader>e         Toggle file tree
+  <leader>fe        Focus file tree
+
+Tab Navigation ~
+  <C-t>             New tab
+  th                First tab
+  tk                Next tab
+  tj                Previous tab
+  tl                Last tab
+  tt                Open file in new tab
+  td                Close tab
+
+==============================================================================
+EDITING                                              *cheatsheet-editing*
+
+Basic ~
+  <leader>w         Save file (:w!)
+  <leader>q         Quit window
+  <leader>S         Strip trailing whitespace
+  jk                Escape (insert mode)
+
+Clipboard ~
+  <leader>y         Yank to system clipboard
+  <leader>x         Cut to system clipboard
+  <leader>p         Paste from system clipboard
+
+Session ~
+  <leader>ss        Save session (:mksession)
+
+Surround shortcuts ~
+  <leader>s"        Surround word with "
+  <leader>s'        Surround word with '
+  <leader>s`        Surround word with `
+  <leader>s(        Surround word with ()
+  <leader>s{        Surround word with {}
+  <leader>s[        Surround word with []
+
+Diff ~
+  <leader>df        Start diff mode for current buffer
+
+==============================================================================
+LSP (Language Server Protocol)                         *cheatsheet-lsp*
+
+Navigation ~
+  gD                Go to declaration
+  gd                Go to definition
+  K                 Hover documentation
+  gi                Go to implementation
+  gr                Go to references
+
+Diagnostics ~
+  [d                Previous diagnostic
+  ]d                Next diagnostic
+
+Refactoring ~
+  <leader>rn        Rename symbol
+  <leader>ca        Code action
+
+Installed Servers ~
+  ansiblels         Ansible
+  basedpyright      Python
+  bashls            Bash
+  dockerls          Dockerfile
+  eslint            JavaScript/TypeScript linting
+  gopls             Go
+  helm_ls           Helm charts
+  jsonls            JSON
+  lua_ls            Lua
+  solargraph        Ruby
+  terraformls       Terraform
+  volar             Vue
+  yamlls            YAML
+
+==============================================================================
+GIT                                                    *cheatsheet-git*
+
+Fugitive ~
+  :Git              Run any git command
+  :Git blame        Inline blame
+  :Git log          Commit log
+  :Gdiffsplit       Side-by-side diff
+
+==============================================================================
+TESTING                                              *cheatsheet-testing*
+
+vim-test ~
+  <leader>tn        Run nearest test
+  <leader>tf        Run test file
+
+==============================================================================
+DEBUGGER (nvim-dap)                                    *cheatsheet-dap*
+
+Stepping ~
+  <F5>              Continue / start debug session
+  <F10>             Step over
+  <F11>             Step into
+  <F12>             Step out
+
+Breakpoints ~
+  <leader>db        Toggle breakpoint
+  <leader>dB        Conditional breakpoint (prompts for expression)
+  <leader>dl        Log point (prints message without stopping)
+
+Session Control ~
+  <leader>dx        Continue
+  <leader>dr        Restart session
+  <leader>dq        Terminate session
+  <leader>dp        Pause execution
+  <leader>dC        Run to cursor
+
+UI ~
+  <leader>di        Toggle DAP UI panels
+  <leader>de        Evaluate expression (works in visual mode too)
+  <leader>dh        Hover variable under cursor
+  <leader>do        Toggle REPL
+
+Debug Configurations ~
+
+  Python:
+    Launch file                         Run current .py file
+    Launch with arguments               Prompts for CLI arguments
+    Attach remote (localhost:5678)      For kubectl port-forward / debugpy
+    Attach remote (custom host:port)    Prompts for host and port
+
+  JavaScript / TypeScript:
+    Launch file (Node)                  Run current file with Node
+    Attach to Node (localhost:9229)     For --inspect / kubectl port-forward
+    Attach to Node (custom host:port)   Prompts for host and port
+    Launch Chrome                       Debug in Chrome (prompts for URL)
+
+  Ruby:
+    Launch file                         Run current .rb file
+    Launch with bundler                 bundle exec ruby <file>
+    Launch Rails server                 bundle exec rails server
+    Launch RSpec (current file)         bundle exec rspec <file>
+    Attach remote (localhost:1234)      For rdbg / kubectl port-forward
+    Attach remote (custom host:port)    Prompts for host and port
+
+Remote Debugging (Kubernetes) ~
+
+  The "Attach remote" configurations connect to a debug server over TCP.
+  Use kubectl port-forward to bridge the pod's debug port to localhost:
+
+    # Python (debugpy)
+    kubectl port-forward pod/my-app 5678:5678
+    # Then: <F5> -> "Attach remote (localhost:5678)"
+
+    # JavaScript / Node (--inspect)
+    kubectl port-forward pod/my-app 9229:9229
+    # Then: <F5> -> "Attach to Node (localhost:9229)"
+
+    # Ruby (rdbg / debug.gem)
+    kubectl port-forward pod/my-app 1234:1234
+    # Then: <F5> -> "Attach remote (localhost:1234)"
+
+  On the pod, start the app with its debug server enabled:
+
+    # Python:  python -m debugpy --listen 0.0.0.0:5678 --wait-for-client app.py
+    # Node:    node --inspect=0.0.0.0:9229 app.js
+    # Ruby:    rdbg --open --host 0.0.0.0 --port 1234 -c -- ruby app.rb
+
+==============================================================================
+DATABASE (vim-dadbod)                                *cheatsheet-database*
+
+Connection Management ~
+  <leader>du        Toggle DBUI drawer
+  <leader>da        Add a connection manually
+  <leader>dc        Connect to remote DB (K8s pod)
+  <leader>dd        Disconnect remote DB
+
+Remote Connect (:DBConnect) ~
+  :DBConnect -c <ctx> -n <ns> -d <db>     Connect with defaults
+  :DBConnect -c <ctx> -n <ns> -d <db> -p 5433 -b mydb -u admin
+
+  Flags:
+    -c, --context     Kubernetes context
+    -n, --namespace   Kubernetes namespace
+    -d, --database    Pod name substring to match
+    -s, --secret      Secret name (defaults to -d value)
+    -k, --key         Secret key (default: password)
+    -u, --user        DB user (default: postgres)
+    -p, --port        Remote port (auto-detected if omitted)
+    -b, --dbname      Database name in URL (defaults to -d value)
+
+  :DBDisconnect       Stop port-forward and remove connection
+
+Local Databases ~
+  Use <leader>da to add a local connection URL directly:
+    postgres://user:pass@localhost:5432/mydb
+    mysql://root@localhost:3306/mydb
+    sqlite:path/to/db.sqlite
+
+==============================================================================
+KUBERNETES                                        *cheatsheet-kubernetes*
+
+Pod Connection (:PodConnect) ~
+  <leader>ks        Shell into pod (prompts for context/ns/app)
+  <leader>kl        Tail pod logs
+  <leader>kf        Port-forward pod
+
+  :PodConnect -c <ctx> -n <ns> -a <app>                 Shell (default)
+  :PodConnect -c <ctx> -n <ns> -a <app> logs             Tail logs
+  :PodConnect -c <ctx> -n <ns> -a <app> forward 3000:3000
+
+  All actions open in a terminal split. Close the buffer to stop.
+
+Shell Scripts (~/.local/bin/) ~
+  remote-db-connect -c <ctx> -n <ns> -d <db> [-p <port>]
+  remote-pod-connect -c <ctx> -n <ns> -a <app> [shell|forward|logs]
+
+==============================================================================
+MARKDOWN                                            *cheatsheet-markdown*
+
+  <leader>mp        Toggle live preview in browser
+
+==============================================================================
+AI                                                      *cheatsheet-ai*
+
+Copilot ~
+  <C-l>             Accept Copilot suggestion (insert mode)
+
+Tabby ~
+  See :help tabby for Tabby AI completion keymaps.
+
+==============================================================================
+LEADER KEY GROUPS                                  *cheatsheet-leader*
+
+  ,?                Search all keymaps
+  ,/                Open this cheatsheet
+
+  ,d...             Debug (DAP)
+  ,f...             Find (Telescope)
+  ,g...             Git
+  ,k...             Kubernetes (pod connect)
+  ,m...             Markdown (preview)
+  ,s...             Surround shortcuts
+  ,t...             Test
+  ,x...             Diagnostics
+
+  ,w                Save
+  ,q                Quit
+  ,e                File tree toggle
+  ,h                Clear search highlight
+  ,S                Strip whitespace
+  ,df               Diff mode
+  ,ss               Save session
+
+  Database:
+  ,du               Toggle DBUI
+  ,da               Add DB connection
+  ,dc               Connect remote DB
+  ,dd               Disconnect remote DB
+
+==============================================================================
+PLUGIN MANAGEMENT                                  *cheatsheet-plugins*
+
+  :Lazy             Open lazy.nvim dashboard
+  :Lazy update      Update all plugins
+  :Lazy sync        Install missing + update + clean
+  :Mason            Open Mason LSP/formatter installer
+  :TSUpdate         Update treesitter parsers
+  :checkhealth      Run health checks for all plugins
+
+==============================================================================
+ vim:tw=78:ts=8:ft=help:norl:

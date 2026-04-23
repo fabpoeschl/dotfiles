@@ -37,6 +37,7 @@ local function cfg()
     "eslint",
     "gh_actions_ls",
     "gopls",
+    "helm_ls",
     "jsonls",
     "lua_ls",
     "powershell_es",
