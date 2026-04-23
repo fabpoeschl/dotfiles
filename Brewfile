@@ -22,6 +22,9 @@ brew "lazygit"
 brew "ollama"
 brew "tabbyml/tabby/tabby"
 
+# AI coding assistant
+brew "opencode-ai/tap/opencode"
+
 # Containers
 cask "docker"
 brew "docker-compose"

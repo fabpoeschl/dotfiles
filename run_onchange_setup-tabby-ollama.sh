@@ -59,6 +59,18 @@ else
   warn "tabby already installed"
 fi
 
+# --- OpenCode (Linux only – macOS uses Homebrew) ---
+if ! command -v opencode &>/dev/null; then
+  if [[ "$OS" != "Darwin" ]]; then
+    echo "Installing OpenCode..."
+    curl -fsSL https://opencode.ai/install | bash \
+      && info "opencode installed" \
+      || error "opencode install failed"
+  fi
+else
+  warn "opencode already installed"
+fi
+
 # --- Pull Ollama model ---
 if command -v ollama &>/dev/null; then
   MODEL="qwen2.5-coder:7b"
