@@ -11,6 +11,7 @@
 #   alt  + .     : cycle through previous args
 
 # current selected match accepted in menu selection
+zmodload -i zsh/complist
 bindkey -M menuselect '^M' .accept-line
 
 # go backward in menu with shift-tab

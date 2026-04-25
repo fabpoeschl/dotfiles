@@ -50,9 +50,18 @@ done
 [[ -z "$CONTEXT" || -z "$NAMESPACE" || -z "$DB_NAME" ]] && usage
 
 # Find a running pod
+# Match by resource name: handles both Deployments (name-hash-hash) and StatefulSets (name-ordinal)
 POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
   --field-selector=status.phase=Running \
-  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | grep -F "$DB_NAME" | head -1)
+  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | awk -v app="$DB_NAME" '{
+  name=$0
+  # Try StatefulSet pattern first (name-ordinal)
+  dep=name; sub(/-[0-9]+$/, "", dep)
+  if (dep == app && dep != name) { print name; exit }
+  # Then Deployment pattern (name-hash-hash)
+  dep=name; sub(/-[a-z0-9]+-[a-z0-9]+$/, "", dep)
+  if (dep == app && dep != name) { print name; exit }
+}')
 
 if [[ -z "$POD" ]]; then
   echo "Error: no running pod matching '$DB_NAME' found in $NAMESPACE (context: $CONTEXT)"
