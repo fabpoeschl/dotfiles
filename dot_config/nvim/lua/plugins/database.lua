@@ -9,12 +9,7 @@
 -- Example:
 --   export DBCONNECT_CREDENTIALS_CMD="scripts/db-credentials.sh"
 
--- Extract resource name: StatefulSet (name-ordinal) or Deployment (name-hash-hash)
-local function resource_name(pod_name)
-  local ss = pod_name:match("^(.+)%-[0-9]+$")
-  if ss then return ss end
-  return pod_name:match("^(.+)%-[a-z0-9]+%-[a-z0-9]+$")
-end
+local k8s = require("util.k8s")
 
 local active_connections = {}
 
@@ -141,75 +136,56 @@ vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
   end
 
   -- Step 1: Find the pod
-  vim.system(
-    { "kubectl", "--context", opts.context, "-n", opts.namespace,
-      "get", "pods", "--field-selector=status.phase=Running",
-      "-o", "jsonpath={.items[*].metadata.name}" },
-    {},
-    vim.schedule_wrap(function(pod_result)
-      if pod_result.code ~= 0 then
-        vim.notify("DBConnect: kubectl failed: " .. (pod_result.stderr or ""), vim.log.levels.ERROR)
+  k8s.find_pod(opts.context, opts.namespace, opts.database, function(pod, find_err)
+    if not pod then
+      vim.notify("DBConnect: " .. find_err, vim.log.levels.ERROR)
+      return
+    end
+
+    -- Step 2: Get credentials
+    get_credentials(opts, function(script_user, password)
+      -- User priority: -u flag > script output > DBCONNECT_USER env > "postgres"
+      opts.user = opts.user or script_user or vim.env.DBCONNECT_USER or "postgres"
+
+      -- Step 3: Start port-forward
+      local job_id = vim.fn.jobstart({
+        "kubectl", "--context", opts.context, "-n", opts.namespace,
+        "port-forward", pod, local_port .. ":" .. tostring(remote_port),
+      }, {
+        on_stderr = function(_, data)
+          local msg = table.concat(data, "\n"):gsub("%s+$", "")
+          if msg ~= "" then
+            vim.notify("DBConnect [" .. conn_name .. "]: " .. msg, vim.log.levels.WARN)
+          end
+        end,
+        on_exit = function(_, code)
+          active_connections[conn_name] = nil
+          if code ~= 0 then
+            vim.notify("DBConnect: port-forward exited (code " .. code .. ")", vim.log.levels.WARN)
+          end
+        end,
+      })
+
+      if job_id <= 0 then
+        vim.notify("DBConnect: failed to start port-forward", vim.log.levels.ERROR)
         return
       end
 
-      local pod
-      for name in pod_result.stdout:gmatch("%S+") do
-        if resource_name(name) == opts.database then
-          pod = name
-          break
-        end
-      end
+      -- Step 4: Register connection with dadbod
+      local url = string.format("%s://%s:%s@localhost:%s/%s",
+        scheme, opts.user, encode_password(password), local_port, dbname)
 
-      if not pod then
-        vim.notify("DBConnect: no running pod matching '" .. opts.database .. "'", vim.log.levels.ERROR)
-        return
-      end
+      local dbs = vim.g.dbs or {}
+      dbs[conn_name] = url
+      vim.g.dbs = dbs
 
-      -- Step 2: Get credentials
-      get_credentials(opts, function(script_user, password)
-        -- User priority: -u flag > script output > DBCONNECT_USER env > "postgres"
-        opts.user = opts.user or script_user or vim.env.DBCONNECT_USER or "postgres"
+      active_connections[conn_name] = { job_id = job_id, port = local_port, scheme = scheme }
 
-        -- Step 3: Start port-forward
-        local job_id = vim.fn.jobstart({
-          "kubectl", "--context", opts.context, "-n", opts.namespace,
-          "port-forward", pod, local_port .. ":" .. tostring(remote_port),
-        }, {
-          on_stderr = function(_, data)
-            local msg = table.concat(data, "\n"):gsub("%s+$", "")
-            if msg ~= "" then
-              vim.notify("DBConnect [" .. conn_name .. "]: " .. msg, vim.log.levels.WARN)
-            end
-          end,
-          on_exit = function(_, code)
-            active_connections[conn_name] = nil
-            if code ~= 0 then
-              vim.notify("DBConnect: port-forward exited (code " .. code .. ")", vim.log.levels.WARN)
-            end
-          end,
-        })
-
-        if job_id <= 0 then
-          vim.notify("DBConnect: failed to start port-forward", vim.log.levels.ERROR)
-          return
-        end
-
-        -- Step 4: Register connection with dadbod
-        local url = string.format("%s://%s:%s@localhost:%s/%s",
-          scheme, opts.user, encode_password(password), local_port, dbname)
-
-        local dbs = vim.g.dbs or {}
-        dbs[conn_name] = url
-        vim.g.dbs = dbs
-
-        active_connections[conn_name] = { job_id = job_id, port = local_port, scheme = scheme }
-
-        vim.notify(string.format(
-          "DBConnect: %s (localhost:%s, user=%s, db=%s) — :DBUI to browse",
-          conn_name, local_port, opts.user, dbname))
-      end)
+      vim.notify(string.format(
+        "DBConnect: %s (localhost:%s, user=%s, db=%s) — :DBUI to browse",
+        conn_name, local_port, opts.user, dbname))
     end)
-  )
+  end)
 end, {
   nargs = "*",
   desc = "Connect to a remote database (port-forward + dadbod)",

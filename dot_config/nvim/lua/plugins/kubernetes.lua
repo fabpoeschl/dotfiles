@@ -1,40 +1,7 @@
 -- Kubernetes pod connection tools (no external plugin needed)
 -- Registers :PodConnect command and <leader>k keymaps
 
--- Extract the resource name from a pod name.
--- Handles both Deployments (name-replicaset-pod) and StatefulSets (name-ordinal).
--- e.g. "<deployment>-9b9f8fb6c-hm6jw" -> "<deployment>"
--- e.g. "<statefulset>-0"              -> "<statefulset>"
-local function resource_name(pod_name)
-  -- StatefulSet: ends with a numeric ordinal
-  local ss = pod_name:match("^(.+)%-[0-9]+$")
-  if ss then return ss end
-  -- Deployment: ends with two alphanumeric hash segments
-  return pod_name:match("^(.+)%-[a-z0-9]+%-[a-z0-9]+$")
-end
-
--- Find a running pod by deployment name (async)
-local function find_pod(context, namespace, app, callback)
-  vim.system(
-    { "kubectl", "--context", context, "-n", namespace,
-      "get", "pods", "--field-selector=status.phase=Running",
-      "-o", "jsonpath={.items[*].metadata.name}" },
-    {},
-    vim.schedule_wrap(function(result)
-      if result.code ~= 0 then
-        callback(nil, result.stderr or "kubectl failed")
-        return
-      end
-      for name in result.stdout:gmatch("%S+") do
-        if resource_name(name) == app then
-          callback(name, nil)
-          return
-        end
-      end
-      callback(nil, "no running pod matching '" .. app .. "'")
-    end)
-  )
-end
+local k8s = require("util.k8s")
 
 -- Parse flags from fargs, return opts and remaining positional args
 local function parse_args(fargs)
@@ -90,7 +57,7 @@ vim.api.nvim_create_user_command("PodConnect", function(cmd_opts)
 
   local action = rest[1] or "shell"
 
-  find_pod(parsed.context, parsed.namespace, parsed.app, function(pod, err)
+  k8s.find_pod(parsed.context, parsed.namespace, parsed.app, function(pod, err)
     if not pod then
       vim.notify("PodConnect: " .. err, vim.log.levels.ERROR)
       return

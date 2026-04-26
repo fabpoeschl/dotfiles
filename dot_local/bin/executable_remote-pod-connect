@@ -21,13 +21,16 @@ if ! command -v kubectl &>/dev/null; then
   exit 1
 fi
 
+# shellcheck source=../../dot_local/share/dotfiles/k8s-utils.sh
+source "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/k8s-utils.sh"
+
 usage() {
   echo "Usage: remote-pod-connect -c <context> -n <namespace> -a <app> [action] [args...]"
   echo ""
   echo "Options:"
   echo "  -c, --context       Kubernetes context (e.g. staging, production)"
   echo "  -n, --namespace     Kubernetes namespace"
-  echo "  -a, --application   Substring to match against pod names"
+  echo "  -a, --application   Deployment / StatefulSet / DaemonSet name"
   echo ""
   echo "Actions:"
   echo "  shell                          Open a shell (default)"
@@ -62,19 +65,7 @@ done
 ACTION="${1:-shell}"
 [[ $# -gt 0 ]] && shift  # consume action arg
 
-# Find a running pod
-# Match by resource name: handles both Deployments (name-hash-hash) and StatefulSets (name-ordinal)
-POD=$(kubectl --context "$CONTEXT" -n "$NAMESPACE" get pods \
-  --field-selector=status.phase=Running \
-  -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | awk -v app="$APP_NAME" '{
-  name=$0
-  # Try StatefulSet pattern first (name-ordinal)
-  dep=name; sub(/-[0-9]+$/, "", dep)
-  if (dep == app && dep != name) { print name; exit }
-  # Then Deployment pattern (name-hash-hash)
-  dep=name; sub(/-[a-z0-9]+-[a-z0-9]+$/, "", dep)
-  if (dep == app && dep != name) { print name; exit }
-}')
+POD=$(k8s_find_pod "$CONTEXT" "$NAMESPACE" "$APP_NAME")
 
 if [[ -z "$POD" ]]; then
   echo "Error: no running pod matching '$APP_NAME' found in $NAMESPACE (context: $CONTEXT)"
