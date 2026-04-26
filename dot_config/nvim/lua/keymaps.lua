@@ -55,8 +55,8 @@ vim.keymap.set("n", "<leader>s]", "ysiw]")
 vim.keymap.set("n", "<leader>s{", "ysiw{")
 vim.keymap.set("n", "<leader>s}", "ysiw}")
 
--- Diff mode
-vim.keymap.set("n", "<leader>df", ":diffthis<CR>")
+-- Diff mode (vimdiff). Run on two buffers to compare; :diffoff to clear.
+vim.keymap.set("n", "<leader>gD", ":diffthis<CR>", { desc = "Diff buffer (vimdiff)" })
 
 -- Copilot keymaps
 vim.keymap.set("i", "<C-l>", function()

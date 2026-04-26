@@ -70,9 +70,6 @@ Surround shortcuts ~
   <leader>s{        Surround word with {}
   <leader>s[        Surround word with []
 
-Diff ~
-  <leader>df        Start diff mode for current buffer
-
 ==============================================================================
 LSP (Language Server Protocol)                         *cheatsheet-lsp*
 
@@ -113,7 +110,8 @@ Fugitive ~
   :Git              Run any git command
   :Git blame        Inline blame
   :Git log          Commit log
-  :Gdiffsplit       Side-by-side diff
+  <leader>gd        :Gdiffsplit (side-by-side diff via fugitive)
+  <leader>gD        :diffthis (mark buffer for vimdiff comparison)
 
 ==============================================================================
 TESTING                                              *cheatsheet-testing*
@@ -291,7 +289,6 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
   ,e                File tree toggle
   ,h                Clear search highlight
   ,S                Strip whitespace
-  ,df               Diff mode
   ,ss               Save session
 
   Database:
