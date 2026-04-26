@@ -192,17 +192,80 @@ Remote Debugging (Kubernetes) ~
     # Node:    node --inspect=0.0.0.0:9229 app.js
     # Ruby:    rdbg --open --host 0.0.0.0 --port 1234 -c -- ruby app.rb
 
-Per-project remote workspace root ~
+==============================================================================
+PER-PROJECT CONFIGURATION                          *cheatsheet-project-config*
 
-  The "Attach remote" Python and Node configs default to /app for the
-  remote workspace root (where source files live inside the container).
-  Override per project by creating a .nvim.lua at the project root:
+  exrc is enabled globally (see options.lua), so a .nvim.lua at the
+  project root is auto-sourced from the cwd. Run :trust on first open
+  to authorize it. CLI flags always win over these defaults.
+
+  Single-default fields ~
 
     -- .nvim.lua
-    vim.g.dap_remote_root = "/srv/app"
+    vim.g.k8s_context             = "<your-context>"     -- DBConnect / PodConnect
+    vim.g.k8s_namespace           = "<your-namespace>"   -- DBConnect / PodConnect
+    vim.g.dbconnect_database      = "<workload>"         -- :DBConnect workload
+    vim.g.dbconnect_user          = "<db-user>"          -- :DBConnect user
+    vim.g.dbconnect_credentials_cmd = "scripts/db-credentials.sh"
+    vim.g.podconnect_application  = "<app-workload>"     -- :PodConnect default
+    vim.g.dap_remote_root         = "/srv/app"           -- DAP pathMappings
 
-  Then run :trust on first open to authorize the file. exrc is enabled
-  globally (see options.lua), so the file is auto-sourced from cwd.
+  Presets (multiple environments / databases) ~
+
+    For projects with several context+workload combinations, define a
+    presets table. Pass the preset name as a positional arg, or run
+    :DBConnect / :PodConnect bare to pick from a vim.ui.select. Tab-
+    completion suggests preset names.
+
+    vim.g.dbconnect_presets = {
+      ["staging/core"]    = { context = "<staging-ctx>", namespace = "<staging-ns>",
+                              database = "<staging-core-workload>",   local_port = "5432" },
+      ["staging/metric"]  = { context = "<staging-ctx>", namespace = "<staging-ns>",
+                              database = "<staging-metric-workload>", local_port = "5433" },
+      ["prod/core"]       = { context = "<prod-ctx>",    namespace = "<prod-ns>",
+                              database = "<prod-core-workload>",      local_port = "5434" },
+      ["prod/metric"]     = { context = "<prod-ctx>",    namespace = "<prod-ns>",
+                              database = "<prod-metric-workload>",    local_port = "5435" },
+    }
+
+    vim.g.podconnect_presets = {
+      ["staging/api"] = { context = "<staging-ctx>", namespace = "<staging-ns>", app = "<api-workload>" },
+      ["prod/api"]    = { context = "<prod-ctx>",    namespace = "<prod-ns>",    app = "<api-workload>" },
+    }
+
+    Recognized preset keys mirror the CLI flags:
+      DBConnect: context, namespace, database, user, port, local_port, dbname
+      PodConnect: context, namespace, app
+
+    Distinct local_port per preset is what lets multiple connections
+    coexist (otherwise both would try to bind localhost:5432).
+
+  Splitting presets across files ~
+
+    .nvim.lua is just lua, so you can keep contexts in separate files
+    and aggregate them:
+
+      -- .nvim.lua
+      vim.g.dbconnect_presets = {}
+      vim.g.podconnect_presets = {}
+      for _, f in ipairs(vim.fn.glob(".nvim.d/*.lua", false, true)) do
+        dofile(f)
+      end
+
+      -- .nvim.d/lab.lua
+      vim.g.dbconnect_presets["lab/core"]   = { ... }
+      vim.g.dbconnect_presets["lab/metric"] = { ... }
+
+    :trust only covers .nvim.lua; the dofile'd files run unsandboxed,
+    so only use this for files you wrote yourself.
+
+  Resolution order ~
+
+    1. CLI flag passed to the command
+    2. preset values (if a preset name was given or chosen via picker)
+    3. vim.g.<name> (single-default field)
+    4. environment variable (where applicable, e.g. $DBCONNECT_USER)
+    5. interactive prompt or hardcoded fallback
 
 ==============================================================================
 DATABASE (vim-dadbod)                                *cheatsheet-database*
@@ -214,8 +277,13 @@ Connection Management ~
   <leader>Dd        Disconnect remote DB
 
 Remote Connect (:DBConnect) ~
-  :DBConnect -c <ctx> -n <ns> -d <workload>
+  :DBConnect                                  Pick from preset list (if any)
+  :DBConnect <preset>                         Use a preset from .nvim.lua
+  :DBConnect <preset> -u readonly             Preset + override one field
+  :DBConnect -c <ctx> -n <ns> -d <workload>   Pure flags
   :DBConnect -c <ctx> -n <ns> -d <workload> -p 5433 -l 15432 -b mydb -u admin
+
+  See PER-PROJECT CONFIGURATION for the preset table format.
 
   Flags:
     -c, --context     Kubernetes context
@@ -251,11 +319,16 @@ Pod Connection (:PodConnect) ~
   <leader>kl        Tail pod logs
   <leader>kf        Port-forward pod
 
-  :PodConnect -c <ctx> -n <ns> -a <app>                 Shell (default)
+  :PodConnect                                            Pick preset (if any)
+  :PodConnect <preset>                                   Preset, action=shell
+  :PodConnect <preset> logs                              Preset + action
+  :PodConnect -c <ctx> -n <ns> -a <app>                  Shell (default)
   :PodConnect -c <ctx> -n <ns> -a <app> logs             Tail logs
   :PodConnect -c <ctx> -n <ns> -a <app> forward 3000:3000
 
   All actions open in a terminal split. Close the buffer to stop.
+  If the first positional matches a preset name it is consumed as a
+  preset; otherwise it is treated as the action.
 
 Pod matching ~
   -a <app> resolves to a Deployment / StatefulSet / DaemonSet / Job by

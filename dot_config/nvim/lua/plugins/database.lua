@@ -13,8 +13,12 @@ local k8s = require("util.k8s")
 
 local active_connections = {}
 
+-- Returns (opts, preset_name). preset_name is the first non-flag positional
+-- (only one allowed); nil if none. opts holds explicit -flag values only —
+-- preset filling happens in the command body so flags can override fields.
 local function parse_flags(fargs)
   local opts = {}
+  local preset
   local flags = {
     ["-c"] = "context",    ["--context"]    = "context",
     ["-n"] = "namespace",  ["--namespace"]  = "namespace",
@@ -26,21 +30,42 @@ local function parse_flags(fargs)
   }
   local i = 1
   while i <= #fargs do
-    local flag = fargs[i]
-    local field = flags[flag]
+    local arg = fargs[i]
+    local field = flags[arg]
     if field then
       if i + 1 > #fargs then
-        vim.notify("DBConnect: " .. flag .. " requires a value", vim.log.levels.ERROR)
+        vim.notify("DBConnect: " .. arg .. " requires a value", vim.log.levels.ERROR)
         return nil
       end
       opts[field] = fargs[i + 1]
       i = i + 2
-    else
-      vim.notify("DBConnect: unknown flag " .. flag, vim.log.levels.ERROR)
+    elseif arg:sub(1, 1) == "-" then
+      vim.notify("DBConnect: unknown flag " .. arg, vim.log.levels.ERROR)
       return nil
+    elseif preset then
+      vim.notify("DBConnect: only one preset name allowed (got '" .. preset
+        .. "' and '" .. arg .. "')", vim.log.levels.ERROR)
+      return nil
+    else
+      preset = arg
+      i = i + 1
     end
   end
-  return opts
+  return opts, preset
+end
+
+-- Fill any unset opts fields from vim.g.dbconnect_presets[name]. Returns
+-- true on success; false and a notification on unknown preset.
+local function apply_preset(opts, name)
+  local presets = vim.g.dbconnect_presets
+  if not presets or not presets[name] then
+    vim.notify("DBConnect: unknown preset '" .. name .. "'", vim.log.levels.ERROR)
+    return false
+  end
+  for k, v in pairs(presets[name]) do
+    if opts[k] == nil then opts[k] = v end
+  end
+  return true
 end
 
 local function detect_db_type(database)
@@ -58,8 +83,10 @@ end
 
 -- Fetch credentials via external script.
 -- Returns (username, password) via callback. Username may be nil.
+-- Script path: vim.g.dbconnect_credentials_cmd (project-local, .nvim.lua)
+-- falls back to $DBCONNECT_CREDENTIALS_CMD (shell env).
 local function get_credentials(opts, callback)
-  local cmd = vim.env.DBCONNECT_CREDENTIALS_CMD
+  local cmd = vim.g.dbconnect_credentials_cmd or vim.env.DBCONNECT_CREDENTIALS_CMD
   if not cmd then
     local password = vim.fn.inputsecret("Password: ")
     if password == "" then
@@ -123,19 +150,32 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
   end,
 })
 
--- :DBConnect -c <ctx> -n <ns> -d <db> [-u <user>] [-p <port>] [-l <local-port>] [-b <dbname>]
+-- :DBConnect [<preset>] [-c <ctx>] [-n <ns>] [-d <db>] [-u <user>] [-p <port>] [-l <local-port>] [-b <dbname>]
 vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
   if vim.fn.executable("kubectl") == 0 then
     vim.notify("DBConnect: kubectl not in PATH", vim.log.levels.ERROR)
     return
   end
 
-  local opts = parse_flags(cmd_opts.fargs)
+  local opts, preset = parse_flags(cmd_opts.fargs)
   if not opts then return end
 
-  opts.context = opts.context or vim.fn.input("Context: ")
-  opts.namespace = opts.namespace or vim.fn.input("Namespace: ")
-  opts.database = opts.database or vim.fn.input("Database pod name: ")
+  -- Bare invocation with presets defined: pop a picker, then re-invoke
+  -- with the chosen name (vim.cmd args are escaped, so this is safe).
+  if not preset and #cmd_opts.fargs == 0
+      and vim.g.dbconnect_presets and next(vim.g.dbconnect_presets) then
+    vim.ui.select(vim.tbl_keys(vim.g.dbconnect_presets), { prompt = "DBConnect:" }, function(choice)
+      if choice then vim.cmd({ cmd = "DBConnect", args = { choice } }) end
+    end)
+    return
+  end
+
+  if preset and not apply_preset(opts, preset) then return end
+
+  -- Defaults (vim.g.*) are intended to be set per project via .nvim.lua.
+  opts.context = opts.context or vim.g.k8s_context or vim.fn.input("Context: ")
+  opts.namespace = opts.namespace or vim.g.k8s_namespace or vim.fn.input("Namespace: ")
+  opts.database = opts.database or vim.g.dbconnect_database or vim.fn.input("Database workload: ")
 
   if opts.context == "" or opts.namespace == "" or opts.database == "" then
     vim.notify("DBConnect: context, namespace, and database are required", vim.log.levels.ERROR)
@@ -162,8 +202,10 @@ vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
 
     -- Step 2: Get credentials
     get_credentials(opts, function(script_user, password)
-      -- User priority: -u flag > script output > DBCONNECT_USER env > "postgres"
-      opts.user = opts.user or script_user or vim.env.DBCONNECT_USER or "postgres"
+      -- User priority: -u flag > script output > vim.g.dbconnect_user (project)
+      -- > DBCONNECT_USER env (global) > "postgres"
+      opts.user = opts.user or script_user
+        or vim.g.dbconnect_user or vim.env.DBCONNECT_USER or "postgres"
 
       -- Step 3: Start port-forward; register with dadbod only once kubectl
       -- reports the local socket is listening.
@@ -225,6 +267,13 @@ vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
 end, {
   nargs = "*",
   desc = "Connect to a remote database (port-forward + dadbod)",
+  complete = function(arglead)
+    if not vim.g.dbconnect_presets then return {} end
+    return vim.tbl_filter(
+      function(k) return vim.startswith(k, arglead) end,
+      vim.tbl_keys(vim.g.dbconnect_presets)
+    )
+  end,
 })
 
 -- :DBDisconnect [name] — stop port-forward and remove connection
