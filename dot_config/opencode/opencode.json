@@ -1,0 +1,77 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": "deny",
+    "edit": "ask",
+    "write": "ask",
+    "bash": "ask",
+    "webfetch": "ask"
+  },
+  "agent": {
+    "build": {
+      "permission": {
+        "edit": "allow",
+        "write": "allow",
+        "bash": "allow",
+        "webfetch": "allow"
+      }
+    },
+    "plan": {
+      "tools": {
+        "write": true,
+        "edit": true,
+        "patch": true
+      },
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "agents/doc/tasks/**": "allow",
+          "agents/doc/plans/**": "allow",
+          "agents/doc/adr/**": "allow"
+        },
+        "write": {
+          "*": "deny",
+          "agents/doc/tasks/**": "allow",
+          "agents/doc/plans/**": "allow",
+          "agents/doc/adr/**": "allow"
+        },
+        "patch": {
+          "*": "deny",
+          "agents/doc/tasks/**": "allow",
+          "agents/doc/plans/**": "allow",
+          "agents/doc/adr/**": "allow"
+        },
+        "bash": "ask",
+        "webfetch": "ask"
+      }
+    },
+    "review": {
+      "mode": "primary",
+      "description": "Code review with read-only project access. May write to agents/doc/tasks and agents/doc/reviews for review notes and task tracking.",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "patch": true
+      },
+      "permission": {
+        "edit": {
+          "*": "deny",
+          "agents/doc/tasks/**": "allow",
+          "agents/doc/reviews/**": "allow"
+        },
+        "write": {
+          "*": "deny",
+          "agents/doc/tasks/**": "allow",
+          "agents/doc/reviews/**": "allow"
+        },
+        "patch": {
+          "*": "deny",
+          "agents/doc/tasks/**": "allow",
+          "agents/doc/reviews/**": "allow"
+        },
+        "bash": "ask",
+        "webfetch": "ask"
+      }
+    }
+  }
+}
