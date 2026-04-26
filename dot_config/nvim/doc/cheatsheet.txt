@@ -253,7 +253,7 @@ Pod matching ~
   pod-template-hash is stripped to get the Deployment name).
 
 Shell Scripts (~/.local/bin/) ~
-  remote-db-connect -c <ctx> -n <ns> -d <workload> [-p <port>]
+  remote-db-connect -c <ctx> -n <ns> -d <workload> [-p <port>] [-l <local-port>]
   remote-pod-connect -c <ctx> -n <ns> -a <workload> [shell|forward|logs]
 
 ==============================================================================

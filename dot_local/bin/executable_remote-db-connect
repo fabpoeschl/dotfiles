@@ -19,17 +19,19 @@ fi
 source "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles/k8s-utils.sh"
 
 usage() {
-  echo "Usage: remote-db-connect -c <context> -n <namespace> -d <database> [-p <port>]"
+  echo "Usage: remote-db-connect -c <context> -n <namespace> -d <database> [-p <port>] [-l <local-port>]"
   echo ""
   echo "Options:"
   echo "  -c, --context     Kubernetes context (e.g. staging, production)"
   echo "  -n, --namespace   Kubernetes namespace"
   echo "  -d, --database    Deployment / StatefulSet name (e.g. my-postgres)"
   echo "  -p, --port        Remote port (auto-detected from database name if omitted)"
+  echo "  -l, --local-port  Local port to forward to (default: same as remote)"
   echo ""
   echo "Examples:"
   echo "  remote-db-connect -c staging -n my-ns -d my-postgres"
   echo "  remote-db-connect -c staging -n my-ns -d my-postgres -p 5433"
+  echo "  remote-db-connect -c staging -n my-ns -d my-postgres -l 15432"
   echo "  remote-db-connect --context production --namespace payments --database redis"
   exit 1
 }
@@ -38,15 +40,17 @@ CONTEXT=""
 NAMESPACE=""
 DB_NAME=""
 PORT_OVERRIDE=""
+LOCAL_PORT_OVERRIDE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -c|--context)   [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; CONTEXT="$2";       shift 2 ;;
-    -n|--namespace) [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; NAMESPACE="$2";     shift 2 ;;
-    -d|--database)  [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; DB_NAME="$2";       shift 2 ;;
-    -p|--port)      [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; PORT_OVERRIDE="$2"; shift 2 ;;
-    -h|--help)      usage ;;
-    *)              echo "Error: unknown option '$1'"; usage ;;
+    -c|--context)    [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; CONTEXT="$2";             shift 2 ;;
+    -n|--namespace)  [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; NAMESPACE="$2";           shift 2 ;;
+    -d|--database)   [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; DB_NAME="$2";             shift 2 ;;
+    -p|--port)       [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; PORT_OVERRIDE="$2";       shift 2 ;;
+    -l|--local-port) [[ $# -lt 2 ]] && { echo "Error: $1 requires a value"; usage; }; LOCAL_PORT_OVERRIDE="$2"; shift 2 ;;
+    -h|--help)       usage ;;
+    *)               echo "Error: unknown option '$1'"; usage ;;
   esac
 done
 
@@ -95,7 +99,7 @@ if [[ -z "$REMOTE_PORT" ]]; then
   exit 1
 fi
 
-LOCAL_PORT="$REMOTE_PORT"
+LOCAL_PORT="${LOCAL_PORT_OVERRIDE:-$REMOTE_PORT}"
 
 echo "Port-forwarding localhost:$LOCAL_PORT → $POD:$REMOTE_PORT"
 echo "Press Ctrl-C to stop"

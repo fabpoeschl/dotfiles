@@ -50,12 +50,15 @@ return {
         opts = { commented = true },
       },
 
-      -- Auto-install debug adapters via Mason
+      -- Auto-install debug adapters via Mason. Keys are mason-nvim-dap
+      -- adapter aliases ("python" -> debugpy, "js" -> js-debug-adapter).
+      -- Ruby uses rdbg from the `debug` gem (installed via `bundle install`),
+      -- which is not a mason package, so it is intentionally absent here.
       {
         "jay-babu/mason-nvim-dap.nvim",
         dependencies = { "williamboman/mason.nvim" },
         opts = {
-          ensure_installed = { "debugpy", "js", "ruby" },
+          ensure_installed = { "python", "js" },
           automatic_installation = true,
         },
       },
