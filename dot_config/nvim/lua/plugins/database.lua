@@ -94,16 +94,34 @@ local function get_credentials(opts, callback)
   )
 end
 
-local function encode_password(password)
-  vim.cmd("silent! runtime autoload/db/url.vim")
-  local ok, result = pcall(function()
-    return vim.fn["db#url#encode"](password)
-  end)
-  if ok then return result end
-  return password:gsub("([^%w%-%.%_%~])", function(c)
+local function url_encode(s)
+  return (s:gsub("([^%w%-%.%_%~])", function(c)
     return string.format("%%%02X", string.byte(c))
-  end)
+  end))
 end
+
+local function disconnect(name)
+  local conn = active_connections[name]
+  if not conn then
+    vim.notify("DBDisconnect: no active connection '" .. name .. "'", vim.log.levels.ERROR)
+    return
+  end
+  pcall(vim.fn.jobstop, conn.job_id)
+  active_connections[name] = nil
+  local dbs = vim.g.dbs or {}
+  dbs[name] = nil
+  vim.g.dbs = dbs
+  vim.notify("DBDisconnect: disconnected from " .. name)
+end
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = vim.api.nvim_create_augroup("DBConnectCleanup", { clear = true }),
+  callback = function()
+    for _, conn in pairs(active_connections) do
+      pcall(vim.fn.jobstop, conn.job_id)
+    end
+  end,
+})
 
 -- :DBConnect -c <ctx> -n <ns> -d <db> [-u <user>] [-p <port>] [-l <local-port>] [-b <dbname>]
 vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
@@ -147,11 +165,31 @@ vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
       -- User priority: -u flag > script output > DBCONNECT_USER env > "postgres"
       opts.user = opts.user or script_user or vim.env.DBCONNECT_USER or "postgres"
 
-      -- Step 3: Start port-forward
+      -- Step 3: Start port-forward; register with dadbod only once kubectl
+      -- reports the local socket is listening.
+      local ready = false
+
       local job_id = vim.fn.jobstart({
         "kubectl", "--context", opts.context, "-n", opts.namespace,
         "port-forward", pod, local_port .. ":" .. tostring(remote_port),
       }, {
+        on_stdout = function(_, data)
+          if ready then return end
+          for _, line in ipairs(data) do
+            if line:match("Forwarding from") then
+              ready = true
+              local url = string.format("%s://%s:%s@localhost:%s/%s",
+                scheme, opts.user, url_encode(password), local_port, dbname)
+              local dbs = vim.g.dbs or {}
+              dbs[conn_name] = url
+              vim.g.dbs = dbs
+              vim.notify(string.format(
+                "DBConnect: %s (localhost:%s, user=%s, db=%s) — :DBUI to browse",
+                conn_name, local_port, opts.user, dbname))
+              return
+            end
+          end
+        end,
         on_stderr = function(_, data)
           local msg = table.concat(data, "\n"):gsub("%s+$", "")
           if msg ~= "" then
@@ -159,8 +197,18 @@ vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
           end
         end,
         on_exit = function(_, code)
+          -- If disconnect() already cleared the entry, the user got their
+          -- notification — stay silent for the inevitable nonzero exit code.
+          local explicit = active_connections[conn_name] == nil
           active_connections[conn_name] = nil
-          if code ~= 0 then
+          local dbs = vim.g.dbs or {}
+          dbs[conn_name] = nil
+          vim.g.dbs = dbs
+          if explicit then return end
+          if not ready then
+            vim.notify("DBConnect: port-forward exited before becoming ready (code "
+              .. code .. ")", vim.log.levels.ERROR)
+          elseif code ~= 0 then
             vim.notify("DBConnect: port-forward exited (code " .. code .. ")", vim.log.levels.WARN)
           end
         end,
@@ -171,19 +219,7 @@ vim.api.nvim_create_user_command("DBConnect", function(cmd_opts)
         return
       end
 
-      -- Step 4: Register connection with dadbod
-      local url = string.format("%s://%s:%s@localhost:%s/%s",
-        scheme, opts.user, encode_password(password), local_port, dbname)
-
-      local dbs = vim.g.dbs or {}
-      dbs[conn_name] = url
-      vim.g.dbs = dbs
-
       active_connections[conn_name] = { job_id = job_id, port = local_port, scheme = scheme }
-
-      vim.notify(string.format(
-        "DBConnect: %s (localhost:%s, user=%s, db=%s) — :DBUI to browse",
-        conn_name, local_port, opts.user, dbname))
     end)
   end)
 end, {
@@ -193,39 +229,28 @@ end, {
 
 -- :DBDisconnect [name] — stop port-forward and remove connection
 vim.api.nvim_create_user_command("DBDisconnect", function(cmd_opts)
-  local name = cmd_opts.args
-
-  if name == "" then
-    local names = vim.tbl_keys(active_connections)
-    if #names == 0 then
-      vim.notify("DBDisconnect: no active connections", vim.log.levels.INFO)
-      return
-    end
-    vim.ui.select(names, { prompt = "Disconnect:" }, function(choice)
-      if choice then
-        vim.cmd("DBDisconnect " .. choice)
-      end
-    end)
+  if cmd_opts.args ~= "" then
+    disconnect(cmd_opts.args)
     return
   end
 
-  local conn = active_connections[name]
-  if not conn then
-    vim.notify("DBDisconnect: no active connection '" .. name .. "'", vim.log.levels.ERROR)
+  local names = vim.tbl_keys(active_connections)
+  if #names == 0 then
+    vim.notify("DBDisconnect: no active connections", vim.log.levels.INFO)
     return
   end
-
-  vim.fn.jobstop(conn.job_id)
-  active_connections[name] = nil
-
-  local dbs = vim.g.dbs or {}
-  dbs[name] = nil
-  vim.g.dbs = dbs
-
-  vim.notify("DBDisconnect: disconnected from " .. name)
+  vim.ui.select(names, { prompt = "Disconnect:" }, function(choice)
+    if choice then disconnect(choice) end
+  end)
 end, {
   nargs = "?",
   desc = "Disconnect a remote database",
+  complete = function(arglead)
+    return vim.tbl_filter(
+      function(k) return vim.startswith(k, arglead) end,
+      vim.tbl_keys(active_connections)
+    )
+  end,
 })
 
 vim.keymap.set("n", "<leader>dc", "<cmd>DBConnect<CR>", { desc = "Connect to remote DB" })
