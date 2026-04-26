@@ -253,8 +253,8 @@ end, {
   end,
 })
 
-vim.keymap.set("n", "<leader>dc", "<cmd>DBConnect<CR>", { desc = "Connect to remote DB" })
-vim.keymap.set("n", "<leader>dd", "<cmd>DBDisconnect<CR>", { desc = "Disconnect remote DB" })
+vim.keymap.set("n", "<leader>Dc", "<cmd>DBConnect<CR>", { desc = "Connect to remote DB" })
+vim.keymap.set("n", "<leader>Dd", "<cmd>DBDisconnect<CR>", { desc = "Disconnect remote DB" })
 
 return {
   {
@@ -266,8 +266,8 @@ return {
     dependencies = { "tpope/vim-dadbod" },
     cmd = { "DBUI", "DBUIToggle", "DBUIAddConnection" },
     keys = {
-      { "<leader>du", "<cmd>DBUIToggle<CR>", desc = "Toggle DB UI" },
-      { "<leader>da", "<cmd>DBUIAddConnection<CR>", desc = "Add DB connection" },
+      { "<leader>Du", "<cmd>DBUIToggle<CR>", desc = "Toggle DB UI" },
+      { "<leader>Da", "<cmd>DBUIAddConnection<CR>", desc = "Add DB connection" },
     },
     init = function()
       vim.g.db_ui_use_nerd_fonts = 1
