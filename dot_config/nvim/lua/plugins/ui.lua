@@ -53,6 +53,7 @@ return {
         { "<leader>t", group = "Test" },
         { "<leader>x", group = "Diagnostics" },
         { "<leader>?", "<cmd>Telescope keymaps<CR>", desc = "Search all keymaps" },
+        { "<leader>/", function() vim.cmd("help cheatsheet") end, desc = "Cheatsheet" },
       })
     end,
   },
