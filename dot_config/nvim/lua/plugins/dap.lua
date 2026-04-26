@@ -95,6 +95,12 @@ return {
     config = function()
       local dap = require("dap")
 
+      -- Default remote workspace root for "Attach remote" configs. Override
+      -- per project by setting `vim.g.dap_remote_root = "/srv/app"` (or
+      -- whatever the container uses) in a .nvim.lua at the project root —
+      -- requires `:trust` on first encounter.
+      local function remote_root() return vim.g.dap_remote_root or "/app" end
+
       -- Gutter signs
       vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DiagnosticError", linehl = "", numhl = "" })
       vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
@@ -150,7 +156,7 @@ return {
           request = "attach",
           connect = { host = "127.0.0.1", port = 5678 },
           pathMappings = {
-            { localRoot = "${workspaceFolder}", remoteRoot = "/app" },
+            { localRoot = "${workspaceFolder}", remoteRoot = remote_root },
           },
         },
         {
@@ -164,7 +170,7 @@ return {
           pathMappings = {
             {
               localRoot = "${workspaceFolder}",
-              remoteRoot = function() return vim.fn.input("Remote path: ", ".") end,
+              remoteRoot = function() return vim.fn.input("Remote path: ", remote_root()) end,
             },
           },
         },
@@ -202,7 +208,7 @@ return {
             port = 9229,
             cwd = "${workspaceFolder}",
             localRoot = "${workspaceFolder}",
-            remoteRoot = "/app",
+            remoteRoot = remote_root,
             restart = true,
           },
           {
@@ -213,7 +219,7 @@ return {
             port = function() return tonumber(vim.fn.input("Port: ", "9229")) end,
             cwd = "${workspaceFolder}",
             localRoot = "${workspaceFolder}",
-            remoteRoot = function() return vim.fn.input("Remote path: ", "/app") end,
+            remoteRoot = function() return vim.fn.input("Remote path: ", remote_root()) end,
             restart = true,
           },
           {

@@ -192,6 +192,18 @@ Remote Debugging (Kubernetes) ~
     # Node:    node --inspect=0.0.0.0:9229 app.js
     # Ruby:    rdbg --open --host 0.0.0.0 --port 1234 -c -- ruby app.rb
 
+Per-project remote workspace root ~
+
+  The "Attach remote" Python and Node configs default to /app for the
+  remote workspace root (where source files live inside the container).
+  Override per project by creating a .nvim.lua at the project root:
+
+    -- .nvim.lua
+    vim.g.dap_remote_root = "/srv/app"
+
+  Then run :trust on first open to authorize the file. exrc is enabled
+  globally (see options.lua), so the file is auto-sourced from cwd.
+
 ==============================================================================
 DATABASE (vim-dadbod)                                *cheatsheet-database*
 

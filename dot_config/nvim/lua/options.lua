@@ -22,6 +22,11 @@ opt.completeopt = { 'menuone', 'noselect' }
 -- mouse mode
 vim.opt.mouse = "a"
 
+-- Auto-load .nvim.lua / .nvimrc / .exrc from the cwd. Trust per file via
+-- :trust (state in stdpath('state')/trust). Used to override settings like
+-- vim.g.dap_remote_root on a per-project basis.
+opt.exrc = true
+
 opt.wrap = false
 opt.matchtime = 2
 
