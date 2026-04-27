@@ -1,10 +1,56 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
   "permission": {
     "external_directory": "deny",
+    "read": {
+      "*": "allow",
+      ".env": "deny",
+      ".env.*": "deny",
+      ".envrc": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
+      "**/.envrc": "deny",
+      "**/.ssh/**": "deny",
+      "**/.aws/credentials": "deny",
+      "**/.aws/config": "deny",
+      "**/.gnupg/**": "deny",
+      "**/*.pem": "deny",
+      "**/id_rsa*": "deny",
+      "**/id_ed25519*": "deny",
+      "**/id_ecdsa*": "deny",
+      "**/id_dsa*": "deny",
+      "**/.netrc": "deny",
+      "**/.npmrc": "deny",
+      "**/.pypirc": "deny"
+    },
     "edit": "ask",
     "write": "ask",
-    "bash": "ask",
+    "bash": {
+      "*": "ask",
+      "sudo": "deny",
+      "sudo *": "deny",
+      "doas": "deny",
+      "doas *": "deny",
+      "su": "deny",
+      "su *": "deny",
+      "rm -rf /": "deny",
+      "rm -rf /*": "deny",
+      "rm -rf ~": "deny",
+      "rm -rf ~/*": "deny",
+      "rm -rf $HOME": "deny",
+      "rm -rf $HOME/*": "deny",
+      ":(){ :|:&};:": "deny",
+      "chmod -R 777*": "deny",
+      "chown -R *": "deny",
+      "git push --force*": "ask",
+      "git push -f*": "ask",
+      "git reset --hard*": "ask",
+      "git clean -fd*": "ask",
+      "git clean -fdx*": "ask",
+      "git branch -D*": "ask",
+      "git checkout -- *": "ask"
+    },
     "webfetch": "ask"
   },
   "agent": {
@@ -12,7 +58,31 @@
       "permission": {
         "edit": "allow",
         "write": "allow",
-        "bash": "allow",
+        "bash": {
+          "*": "allow",
+          "sudo": "deny",
+          "sudo *": "deny",
+          "doas": "deny",
+          "doas *": "deny",
+          "su": "deny",
+          "su *": "deny",
+          "rm -rf /": "deny",
+          "rm -rf /*": "deny",
+          "rm -rf ~": "deny",
+          "rm -rf ~/*": "deny",
+          "rm -rf $HOME": "deny",
+          "rm -rf $HOME/*": "deny",
+          ":(){ :|:&};:": "deny",
+          "chmod -R 777*": "deny",
+          "chown -R *": "deny",
+          "git push --force*": "ask",
+          "git push -f*": "ask",
+          "git reset --hard*": "ask",
+          "git clean -fd*": "ask",
+          "git clean -fdx*": "ask",
+          "git branch -D*": "ask",
+          "git checkout -- *": "ask"
+        },
         "webfetch": "allow"
       }
     },
@@ -40,9 +110,7 @@
           "agents/doc/tasks/**": "allow",
           "agents/doc/plans/**": "allow",
           "agents/doc/adr/**": "allow"
-        },
-        "bash": "ask",
-        "webfetch": "ask"
+        }
       }
     },
     "review": {
@@ -68,9 +136,7 @@
           "*": "deny",
           "agents/doc/tasks/**": "allow",
           "agents/doc/reviews/**": "allow"
-        },
-        "bash": "ask",
-        "webfetch": "ask"
+        }
       }
     }
   }
