@@ -1,40 +1,7 @@
 -- Kubernetes pod connection tools (no external plugin needed)
 -- Registers :PodConnect command and <leader>k keymaps
 
--- Extract the resource name from a pod name.
--- Handles both Deployments (name-replicaset-pod) and StatefulSets (name-ordinal).
--- e.g. "<deployment>-9b9f8fb6c-hm6jw" -> "<deployment>"
--- e.g. "<statefulset>-0"              -> "<statefulset>"
-local function resource_name(pod_name)
-  -- StatefulSet: ends with a numeric ordinal
-  local ss = pod_name:match("^(.+)%-[0-9]+$")
-  if ss then return ss end
-  -- Deployment: ends with two alphanumeric hash segments
-  return pod_name:match("^(.+)%-[a-z0-9]+%-[a-z0-9]+$")
-end
-
--- Find a running pod by deployment name (async)
-local function find_pod(context, namespace, app, callback)
-  vim.system(
-    { "kubectl", "--context", context, "-n", namespace,
-      "get", "pods", "--field-selector=status.phase=Running",
-      "-o", "jsonpath={.items[*].metadata.name}" },
-    {},
-    vim.schedule_wrap(function(result)
-      if result.code ~= 0 then
-        callback(nil, result.stderr or "kubectl failed")
-        return
-      end
-      for name in result.stdout:gmatch("%S+") do
-        if resource_name(name) == app then
-          callback(name, nil)
-          return
-        end
-      end
-      callback(nil, "no running pod matching '" .. app .. "'")
-    end)
-  )
-end
+local k8s = require("util.k8s")
 
 -- Parse flags from fargs, return opts and remaining positional args
 local function parse_args(fargs)
@@ -69,7 +36,20 @@ local function parse_args(fargs)
   return parsed, rest
 end
 
--- :PodConnect -c <context> -n <namespace> -a <app> [shell|logs|forward <port:port> ...]
+-- Fill any unset `parsed` fields from vim.g.podconnect_presets[name].
+local function apply_preset(parsed, name)
+  local presets = vim.g.podconnect_presets
+  if not presets or not presets[name] then
+    vim.notify("PodConnect: unknown preset '" .. name .. "'", vim.log.levels.ERROR)
+    return false
+  end
+  for k, v in pairs(presets[name]) do
+    if parsed[k] == nil then parsed[k] = v end
+  end
+  return true
+end
+
+-- :PodConnect [<preset>] [-c <ctx>] [-n <ns>] [-a <app>] [shell|logs|forward <ports>...]
 vim.api.nvim_create_user_command("PodConnect", function(cmd_opts)
   if vim.fn.executable("kubectl") == 0 then
     vim.notify("PodConnect: kubectl is not installed or not in PATH", vim.log.levels.ERROR)
@@ -79,9 +59,26 @@ vim.api.nvim_create_user_command("PodConnect", function(cmd_opts)
   local parsed, rest = parse_args(cmd_opts.fargs)
   if not parsed then return end
 
-  parsed.context = parsed.context or vim.fn.input("Context: ")
-  parsed.namespace = parsed.namespace or vim.fn.input("Namespace: ")
-  parsed.app = parsed.app or vim.fn.input("Application: ")
+  -- Bare invocation with presets defined: pop a picker, then re-invoke.
+  if #cmd_opts.fargs == 0
+      and vim.g.podconnect_presets and next(vim.g.podconnect_presets) then
+    vim.ui.select(vim.tbl_keys(vim.g.podconnect_presets), { prompt = "PodConnect:" }, function(choice)
+      if choice then vim.cmd({ cmd = "PodConnect", args = { choice } }) end
+    end)
+    return
+  end
+
+  -- If the first positional matches a preset key, consume it as a preset
+  -- (anything else is the action: shell / logs / forward).
+  if rest[1] and vim.g.podconnect_presets and vim.g.podconnect_presets[rest[1]] then
+    if not apply_preset(parsed, rest[1]) then return end
+    table.remove(rest, 1)
+  end
+
+  -- Defaults (vim.g.*) are intended to be set per project via .nvim.lua.
+  parsed.context = parsed.context or vim.g.k8s_context or vim.fn.input("Context: ")
+  parsed.namespace = parsed.namespace or vim.g.k8s_namespace or vim.fn.input("Namespace: ")
+  parsed.app = parsed.app or vim.g.podconnect_application or vim.fn.input("Application: ")
 
   if parsed.context == "" or parsed.namespace == "" or parsed.app == "" then
     vim.notify("PodConnect: context, namespace, and application are required", vim.log.levels.ERROR)
@@ -90,7 +87,7 @@ vim.api.nvim_create_user_command("PodConnect", function(cmd_opts)
 
   local action = rest[1] or "shell"
 
-  find_pod(parsed.context, parsed.namespace, parsed.app, function(pod, err)
+  k8s.find_pod(parsed.context, parsed.namespace, parsed.app, function(pod, err)
     if not pod then
       vim.notify("PodConnect: " .. err, vim.log.levels.ERROR)
       return
@@ -136,6 +133,18 @@ vim.api.nvim_create_user_command("PodConnect", function(cmd_opts)
 end, {
   nargs = "*",
   desc = "Connect to a remote application pod",
+  complete = function(arglead)
+    local candidates = { "shell", "logs", "forward" }
+    if vim.g.podconnect_presets then
+      for k in pairs(vim.g.podconnect_presets) do
+        table.insert(candidates, k)
+      end
+    end
+    return vim.tbl_filter(
+      function(c) return vim.startswith(c, arglead) end,
+      candidates
+    )
+  end,
 })
 
 vim.keymap.set("n", "<leader>ks", "<cmd>PodConnect shell<CR>", { desc = "Shell into pod" })

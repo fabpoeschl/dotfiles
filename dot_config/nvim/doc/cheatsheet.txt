@@ -70,9 +70,6 @@ Surround shortcuts ~
   <leader>s{        Surround word with {}
   <leader>s[        Surround word with []
 
-Diff ~
-  <leader>df        Start diff mode for current buffer
-
 ==============================================================================
 LSP (Language Server Protocol)                         *cheatsheet-lsp*
 
@@ -113,7 +110,8 @@ Fugitive ~
   :Git              Run any git command
   :Git blame        Inline blame
   :Git log          Commit log
-  :Gdiffsplit       Side-by-side diff
+  <leader>gd        :Gdiffsplit (side-by-side diff via fugitive)
+  <leader>gD        :diffthis (mark buffer for vimdiff comparison)
 
 ==============================================================================
 TESTING                                              *cheatsheet-testing*
@@ -195,32 +193,120 @@ Remote Debugging (Kubernetes) ~
     # Ruby:    rdbg --open --host 0.0.0.0 --port 1234 -c -- ruby app.rb
 
 ==============================================================================
+PER-PROJECT CONFIGURATION                          *cheatsheet-project-config*
+
+  exrc is enabled globally (see options.lua), so a .nvim.lua at the
+  project root is auto-sourced from the cwd. Run :trust on first open
+  to authorize it. CLI flags always win over these defaults.
+
+  Single-default fields ~
+
+    -- .nvim.lua
+    vim.g.k8s_context             = "<your-context>"     -- DBConnect / PodConnect
+    vim.g.k8s_namespace           = "<your-namespace>"   -- DBConnect / PodConnect
+    vim.g.dbconnect_database      = "<workload>"         -- :DBConnect workload
+    vim.g.dbconnect_user          = "<db-user>"          -- :DBConnect user
+    vim.g.dbconnect_credentials_cmd = "scripts/db-credentials.sh"
+    vim.g.podconnect_application  = "<app-workload>"     -- :PodConnect default
+    vim.g.dap_remote_root         = "/srv/app"           -- DAP pathMappings
+
+  Presets (multiple environments / databases) ~
+
+    For projects with several context+workload combinations, define a
+    presets table. Pass the preset name as a positional arg, or run
+    :DBConnect / :PodConnect bare to pick from a vim.ui.select. Tab-
+    completion suggests preset names.
+
+    vim.g.dbconnect_presets = {
+      ["staging/core"]    = { context = "<staging-ctx>", namespace = "<staging-ns>",
+                              database = "<staging-core-workload>",   local_port = "5432" },
+      ["staging/metric"]  = { context = "<staging-ctx>", namespace = "<staging-ns>",
+                              database = "<staging-metric-workload>", local_port = "5433" },
+      ["prod/core"]       = { context = "<prod-ctx>",    namespace = "<prod-ns>",
+                              database = "<prod-core-workload>",      local_port = "5434" },
+      ["prod/metric"]     = { context = "<prod-ctx>",    namespace = "<prod-ns>",
+                              database = "<prod-metric-workload>",    local_port = "5435" },
+    }
+
+    vim.g.podconnect_presets = {
+      ["staging/api"] = { context = "<staging-ctx>", namespace = "<staging-ns>", app = "<api-workload>" },
+      ["prod/api"]    = { context = "<prod-ctx>",    namespace = "<prod-ns>",    app = "<api-workload>" },
+    }
+
+    Recognized preset keys mirror the CLI flags:
+      DBConnect: context, namespace, database, user, port, local_port, dbname
+      PodConnect: context, namespace, app
+
+    Distinct local_port per preset is what lets multiple connections
+    coexist (otherwise both would try to bind localhost:5432).
+
+  Splitting presets across files ~
+
+    .nvim.lua is just lua, so you can keep contexts in separate files
+    and aggregate them:
+
+      -- .nvim.lua
+      vim.g.dbconnect_presets = {}
+      vim.g.podconnect_presets = {}
+      for _, f in ipairs(vim.fn.glob(".nvim.d/*.lua", false, true)) do
+        dofile(f)
+      end
+
+      -- .nvim.d/lab.lua
+      vim.g.dbconnect_presets["lab/core"]   = { ... }
+      vim.g.dbconnect_presets["lab/metric"] = { ... }
+
+    :trust only covers .nvim.lua; the dofile'd files run unsandboxed,
+    so only use this for files you wrote yourself.
+
+  Resolution order ~
+
+    1. CLI flag passed to the command
+    2. preset values (if a preset name was given or chosen via picker)
+    3. vim.g.<name> (single-default field)
+    4. environment variable (where applicable, e.g. $DBCONNECT_USER)
+    5. interactive prompt or hardcoded fallback
+
+==============================================================================
 DATABASE (vim-dadbod)                                *cheatsheet-database*
 
 Connection Management ~
-  <leader>du        Toggle DBUI drawer
-  <leader>da        Add a connection manually
-  <leader>dc        Connect to remote DB (K8s pod)
-  <leader>dd        Disconnect remote DB
+  <leader>Du        Toggle DBUI drawer
+  <leader>Da        Add a connection manually
+  <leader>Dc        Connect to remote DB (K8s pod)
+  <leader>Dd        Disconnect remote DB
 
 Remote Connect (:DBConnect) ~
-  :DBConnect -c <ctx> -n <ns> -d <db>     Connect with defaults
-  :DBConnect -c <ctx> -n <ns> -d <db> -p 5433 -b mydb -u admin
+  :DBConnect                                  Pick from preset list (if any)
+  :DBConnect <preset>                         Use a preset from .nvim.lua
+  :DBConnect <preset> -u readonly             Preset + override one field
+  :DBConnect -c <ctx> -n <ns> -d <workload>   Pure flags
+  :DBConnect -c <ctx> -n <ns> -d <workload> -p 5433 -l 15432 -b mydb -u admin
+
+  See PER-PROJECT CONFIGURATION for the preset table format.
 
   Flags:
     -c, --context     Kubernetes context
     -n, --namespace   Kubernetes namespace
-    -d, --database    Pod name substring to match
-    -s, --secret      Secret name (defaults to -d value)
-    -k, --key         Secret key (default: password)
-    -u, --user        DB user (default: postgres)
-    -p, --port        Remote port (auto-detected if omitted)
+    -d, --database    Deployment / StatefulSet name (resolved via ownerRefs)
+    -u, --user        DB user (default: $DBCONNECT_USER or "postgres")
+    -p, --port        Remote port (auto-detected from name if omitted)
+    -l, --local-port  Local port to forward to (default: same as remote)
     -b, --dbname      Database name in URL (defaults to -d value)
 
-  :DBDisconnect       Stop port-forward and remove connection
+  :DBDisconnect [name]  Stop port-forward and remove connection
+                        Tab-completes active connection names; with no
+                        argument prompts via vim.ui.select.
+
+Credentials ~
+  Set $DBCONNECT_CREDENTIALS_CMD to a script that prints either:
+    password                   (1 line, uses default user)
+    username\npassword         (2 lines, supplies both)
+  The script receives -n <ns> -d <database> -c <context>.
+  If unset, :DBConnect prompts via inputsecret().
 
 Local Databases ~
-  Use <leader>da to add a local connection URL directly:
+  Use <leader>Da to add a local connection URL directly:
     postgres://user:pass@localhost:5432/mydb
     mysql://root@localhost:3306/mydb
     sqlite:path/to/db.sqlite
@@ -233,15 +319,25 @@ Pod Connection (:PodConnect) ~
   <leader>kl        Tail pod logs
   <leader>kf        Port-forward pod
 
-  :PodConnect -c <ctx> -n <ns> -a <app>                 Shell (default)
+  :PodConnect                                            Pick preset (if any)
+  :PodConnect <preset>                                   Preset, action=shell
+  :PodConnect <preset> logs                              Preset + action
+  :PodConnect -c <ctx> -n <ns> -a <app>                  Shell (default)
   :PodConnect -c <ctx> -n <ns> -a <app> logs             Tail logs
   :PodConnect -c <ctx> -n <ns> -a <app> forward 3000:3000
 
   All actions open in a terminal split. Close the buffer to stop.
+  If the first positional matches a preset name it is consumed as a
+  preset; otherwise it is treated as the action.
+
+Pod matching ~
+  -a <app> resolves to a Deployment / StatefulSet / DaemonSet / Job by
+  inspecting each pod's ownerReferences (for ReplicaSet owners the trailing
+  pod-template-hash is stripped to get the Deployment name).
 
 Shell Scripts (~/.local/bin/) ~
-  remote-db-connect -c <ctx> -n <ns> -d <db> [-p <port>]
-  remote-pod-connect -c <ctx> -n <ns> -a <app> [shell|forward|logs]
+  remote-db-connect -c <ctx> -n <ns> -d <workload> [-p <port>] [-l <local-port>]
+  remote-pod-connect -c <ctx> -n <ns> -a <workload> [shell|forward|logs]
 
 ==============================================================================
 MARKDOWN                                            *cheatsheet-markdown*
@@ -264,6 +360,7 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
   ,/                Open this cheatsheet
 
   ,d...             Debug (DAP)
+  ,D...             Database (vim-dadbod)
   ,f...             Find (Telescope)
   ,g...             Git
   ,k...             Kubernetes (pod connect)
@@ -277,14 +374,13 @@ LEADER KEY GROUPS                                  *cheatsheet-leader*
   ,e                File tree toggle
   ,h                Clear search highlight
   ,S                Strip whitespace
-  ,df               Diff mode
   ,ss               Save session
 
   Database:
-  ,du               Toggle DBUI
-  ,da               Add DB connection
-  ,dc               Connect remote DB
-  ,dd               Disconnect remote DB
+  ,Du               Toggle DBUI
+  ,Da               Add DB connection
+  ,Dc               Connect remote DB
+  ,Dd               Disconnect remote DB
 
 ==============================================================================
 PLUGIN MANAGEMENT                                  *cheatsheet-plugins*
