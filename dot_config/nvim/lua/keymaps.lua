@@ -22,6 +22,10 @@ vim.keymap.set("n", "gV", "`[v`]")
 -- 'jk' acts as an escape in insert mode
 vim.keymap.set("i", "jk", "<Esc>")
 
+-- Exit terminal mode. Single <Esc> passes through to the running process
+-- (needed for vim, less, etc. inside a pod). Double <Esc> returns to normal mode.
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
 -- Move to beginning/end of line
 vim.keymap.set("n", "B", "^")
 vim.keymap.set("n", "E", "$")
