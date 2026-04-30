@@ -14,13 +14,15 @@
 	br = branch
 	l  = log --graph --abbrev-commit --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
 	diffw = diff --word-diff=color
+	blame-origin = blame -w -C -C -C
+	log-search = log -S
 [color]
 	ui = auto
 [core]
 	excludesfile = ~/.gitignore
 	autocrlf = input
 	editor = vim
-	pager = delta --dark 2>/dev/null || less -+$LESS -RSX
+	pager = delta-auto 2>/dev/null || less -+$LESS -RSX
 [push]
 	default = simple
 	autoSetupRemote = true
