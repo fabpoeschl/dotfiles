@@ -11,3 +11,6 @@ Brewfile.lock.json
 dot_vim/bundle
 dot_vim/.netrwhist
 dot_vim/plugged
+
+# Per-project Neovim config (machine-local, not committed)
+dot_config/nvim/projects/

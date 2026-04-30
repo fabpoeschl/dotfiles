@@ -259,6 +259,31 @@ PER-PROJECT CONFIGURATION                          *cheatsheet-project-config*
     :trust only covers .nvim.lua; the dofile'd files run unsandboxed,
     so only use this for files you wrote yourself.
 
+  Machine-local config (no .nvim.lua in the repo) ~
+
+    Per-project config can also live in ~/.config/nvim/projects/<name>.lua.
+    These files are excluded from the dotfiles repo (.gitignore /
+    .chezmoiignore) so they never get committed anywhere. This is useful
+    when the project repo has no .nvim.lua, or when you don't want to
+    maintain one per git-worktree.
+
+    The project name is the basename of the git main-worktree root, derived
+    from `git rev-parse --git-common-dir`. The same file is therefore used
+    across all linked worktrees of the same repository. To find the name
+    Neovim will look for, run inside your project:
+
+      git rev-parse --git-common-dir | xargs dirname | xargs basename
+
+    Create the file at that path with the same vim.g variables as above:
+
+      -- ~/.config/nvim/projects/my-app.lua
+      vim.g.k8s_context  = "my-cluster"
+      vim.g.k8s_namespace = "production"
+      vim.g.dbconnect_presets = { ... }
+
+    No :trust prompt is required since the file is in your own config dir.
+    A .nvim.lua in the worktree directory takes precedence (exrc runs first).
+
   Resolution order ~
 
     1. CLI flag passed to the command

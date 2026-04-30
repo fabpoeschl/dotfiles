@@ -27,6 +27,27 @@ vim.opt.mouse = "a"
 -- vim.g.dap_remote_root on a per-project basis.
 opt.exrc = true
 
+-- Load per-project config from ~/.config/nvim/projects/<repo-name>.lua.
+-- The project name is derived from the git common dir so the same file is
+-- used across all linked worktrees. Files live outside the dotfiles repo
+-- (excluded via .gitignore / .chezmoiignore) for machine-local settings.
+vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
+  callback = function()
+    local out = vim.fn.system("git rev-parse --git-common-dir 2>/dev/null")
+    if vim.v.shell_error ~= 0 then return end
+    local git_common = vim.trim(out)
+    if git_common:sub(1, 1) ~= "/" then
+      git_common = vim.fn.getcwd() .. "/" .. git_common
+    end
+    local project_name = vim.fn.fnamemodify(git_common, ":h:t")
+    local cfg = vim.fn.stdpath("config") .. "/projects/" .. project_name .. ".lua"
+    if vim.fn.filereadable(cfg) == 1 then
+      dofile(cfg)
+    end
+  end,
+})
+
 opt.wrap = false
 opt.matchtime = 2
 
