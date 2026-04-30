@@ -9,3 +9,9 @@
   url = "https://github.com/mrzool/bash-sensible.git"
   clone.args = ["--depth", "1"]
   pull.args = ["--depth", "1"]
+
+[".agents"]
+  type = "git-repo"
+  url = "https://github.com/fabpoeschl/agent-workflows.git"
+  clone.args = ["--depth", "1"]
+  pull.args = ["--depth", "1"]
