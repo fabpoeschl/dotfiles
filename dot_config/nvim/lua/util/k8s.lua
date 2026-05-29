@@ -19,9 +19,9 @@ function M.find_pod(context, namespace, workload, callback)
   vim.system(
     { "kubectl", "--context", context, "-n", namespace,
       "get", "pods", "--field-selector=status.phase=Running",
-      "-o", 'jsonpath={range .items[*]}{.metadata.name}{"\t"}'
-        .. '{.metadata.ownerReferences[0].kind}{"\t"}'
-        .. '{.metadata.ownerReferences[0].name}{"\n"}{end}' },
+      "-o", 'jsonpath={range .items[*]}{.metadata.name}{"\\t"}'
+        .. '{.metadata.ownerReferences[0].kind}{"\\t"}'
+        .. '{.metadata.ownerReferences[0].name}{"\\n"}{end}' },
     {},
     vim.schedule_wrap(function(result)
       if result.code ~= 0 then

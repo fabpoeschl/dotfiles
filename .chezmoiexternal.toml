@@ -14,4 +14,4 @@
   type = "git-repo"
   url = "https://github.com/fabpoeschl/agent-workflows.git"
   clone.args = ["--depth", "1"]
-  pull.args = ["--depth", "1"]
+  pull.args = ["--depth", "1", "--rebase"]

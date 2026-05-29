@@ -3,6 +3,6 @@
 
 [model.completion.http]
 kind = "ollama/completion"
-model_name = "qwen2.5-coder:7b"
+model_name = "{{ .ollama_model }}"
 api_endpoint = "http://localhost:11434"
-prompt_template = "{prefix}<|fim_suffix|>{suffix}<|fim_middle|>"
+prompt_template = "<|fim_prefix|>{prefix}<|fim_suffix|>{suffix}<|fim_middle|>"

@@ -1,8 +1,13 @@
 {{- $name := promptStringOnce . "name" "Git full name" "Fabian Poeschl" -}}
 {{- $email := promptStringOnce . "email" "Git email" "fab.poeschl@gmail.com" -}}
 {{- $signingkey := promptStringOnce . "signingkey" "GPG signing key (leave empty to skip)" "" -}}
+{{- $ollama_model := promptStringOnce . "ollama_model" "Ollama completion model" "qwen2.5-coder:7b" -}}
+
+[chezmoi]
+  sourceDir = "{{ .chezmoi.homeDir }}/dotfiles"
 
 [data]
   name = {{ $name | quote }}
   email = {{ $email | quote }}
   signingkey = {{ $signingkey | quote }}
+  ollama_model = {{ $ollama_model | quote }}

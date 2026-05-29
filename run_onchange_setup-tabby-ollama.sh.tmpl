@@ -73,7 +73,7 @@ fi
 
 # --- Pull Ollama model ---
 if command -v ollama &>/dev/null; then
-  MODEL="qwen2.5-coder:7b"
+  MODEL="{{ .ollama_model }}"
   if ollama list 2>/dev/null | grep -q "$MODEL"; then
     warn "ollama model $MODEL already pulled"
   else
